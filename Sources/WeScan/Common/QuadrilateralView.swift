@@ -56,10 +56,12 @@ final class QuadrilateralView: UIView {
             if editable {
                 quadLayer.lineWidth = 0.0
                 quadLayer.strokeColor = UIColor.clear.cgColor
+                print("🟢 WeScan: Mode édition activé - stroke supprimé")
             } else {
                 quadLayer.lineWidth = 2.0
                 // Si tu as déjà une couleur paramétrée via `strokeColor`, utilise-la. Sinon, fallback à orange.
                 quadLayer.strokeColor = self.strokeColor ?? UIColor.systemOrange.cgColor
+                print("🟠 WeScan: Mode normal - stroke activé")
             }
 
             // (Optionnel mais recommandé, à placer une seule fois dans commonInit)
