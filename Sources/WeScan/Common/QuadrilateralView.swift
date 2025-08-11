@@ -24,7 +24,7 @@ final class QuadrilateralView: UIView {
     private let quadLayer: CAShapeLayer = {
         let layer = CAShapeLayer()
         layer.strokeColor = UIColor.systemOrange.cgColor
-        layer.lineWidth = 2.0
+        layer.lineWidth = 1.0
         layer.opacity = 1.0
         layer.isHidden = true
 
@@ -44,18 +44,16 @@ final class QuadrilateralView: UIView {
     private(set) var quad: Quadrilateral?
 
     public var editable = false {
-        didSet {
-            cornerViews(hidden: !editable)
-            quadLayer.fillColor = editable
-             ? UIColor.systemOrange.withAlphaComponent(0.20).cgColor
-             : UIColor.systemOrange.withAlphaComponent(0.10).cgColor
-            guard let quad else {
-                return
-            }
-            drawQuad(quad, animated: false)
-            layoutCornerViews(forQuad: quad)
-        }
-    }
+             didSet {
+                 cornerViews(hidden: !editable)
+                 quadLayer.fillColor = editable
+                     ? UIColor(white: 0.0, alpha: 0.55).cgColor
+                     : UIColor(white: 1.0, alpha: 0.35).cgColor
+                 guard let quad else { return }
+                 drawQuad(quad, animated: false)
+                 layoutCornerViews(forQuad: quad)
+             }
+         }
 
     /// Set stroke color of image rect and corner.
     public var strokeColor: CGColor? {
