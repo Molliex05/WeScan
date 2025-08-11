@@ -17,7 +17,7 @@ final class EditScanViewController: UIViewController {
         imageView.clipsToBounds = true
         imageView.isOpaque = true
         imageView.image = image
-        imageView.backgroundColor = .black
+        imageView.backgroundColor = .systemBackground
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -64,6 +64,21 @@ final class EditScanViewController: UIViewController {
 
     private var quadViewWidthConstraint = NSLayoutConstraint()
     private var quadViewHeightConstraint = NSLayoutConstraint()
+    
+    private lazy var confirmButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle(NSLocalizedString("Valider", comment: ""), for: .normal)
+        
+        // Couleurs modernes
+        button.backgroundColor = .systemOrange
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 12
+        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
+        button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(confirmEditTapped), for: .touchUpInside)
+        return button
+    }()
 
     // MARK: - Life Cycle
 
@@ -88,7 +103,7 @@ final class EditScanViewController: UIViewController {
                                   value: "Edit Scan",
                                   comment: "The title of the EditScanViewController"
         )
-        navigationItem.rightBarButtonItem = nextButton
+        navigationItem.rightBarButtonItem = nil // Supprimer le bouton Next en haut
         if let firstVC = self.navigationController?.viewControllers.first, firstVC == self {
             navigationItem.leftBarButtonItem = cancelButton
         } else {
@@ -121,6 +136,7 @@ final class EditScanViewController: UIViewController {
     private func setupViews() {
         view.addSubview(imageView)
         view.addSubview(quadView)
+        view.addSubview(confirmButton)
     }
 
     private func setupConstraints() {
@@ -141,7 +157,14 @@ final class EditScanViewController: UIViewController {
             quadViewHeightConstraint
         ]
 
-        NSLayoutConstraint.activate(quadViewConstraints + imageViewConstraints)
+        let confirmButtonConstraints = [
+            confirmButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            confirmButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
+            confirmButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
+            confirmButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 56)
+        ]
+        
+        NSLayoutConstraint.activate(quadViewConstraints + imageViewConstraints + confirmButtonConstraints)
     }
 
     // MARK: - Actions
@@ -190,6 +213,11 @@ final class EditScanViewController: UIViewController {
 
         let reviewViewController = ReviewViewController(results: results)
         navigationController?.pushViewController(reviewViewController, animated: true)
+    }
+    
+    @objc private func confirmEditTapped() {
+        // Utilise la même logique que le bouton Next original
+        pushReviewController()
     }
 
     private func displayQuad() {
