@@ -79,8 +79,8 @@ final class QuadrilateralView: UIView {
             if !editable {
                 quadLayer.strokeColor = strokeColor
             }
-            // Toujours garder les coins blancs pour une meilleure visibilité
-            let cornerColor = UIColor.white.cgColor
+            // Coins blancs en mode edit, orange en mode scan
+            let cornerColor = editable ? UIColor.white.cgColor : (strokeColor ?? UIColor.systemOrange.cgColor)
             topLeftCornerView.strokeColor = cornerColor
             topRightCornerView.strokeColor = cornerColor
             bottomRightCornerView.strokeColor = cornerColor
@@ -91,9 +91,10 @@ final class QuadrilateralView: UIView {
     private var isHighlighted = false {
               didSet(oldValue) {
                   guard oldValue != isHighlighted else { return }
+                  // Garder l'overlay même en highlighted pour maintenir le repère visuel
                   quadLayer.fillColor = isHighlighted
-                      ? UIColor.clear.cgColor
-                      : UIColor(white: 0.0, alpha: 0.55).cgColor      // Noir en édition
+                      ? UIColor(white: 0.0, alpha: 0.3).cgColor      // Plus léger quand highlighted
+                      : UIColor(white: 0.0, alpha: 0.55).cgColor     // Normal en édition
                   if isHighlighted { bringSubviewToFront(quadView) } else { sendSubviewToBack(quadView) }
               }
           }
@@ -134,8 +135,8 @@ final class QuadrilateralView: UIView {
         setupConstraints()
         quadView.layer.addSublayer(quadLayer)
         quadLayer.fillRule = .evenOdd
-        // Couleur neutre et visible pour les coins (style Vision Kit)
-        self.strokeColor = UIColor.white.cgColor
+        // Couleur orange par défaut pour le mode scan
+        self.strokeColor = UIColor.systemOrange.cgColor
     }
 
     private func setupConstraints() {
