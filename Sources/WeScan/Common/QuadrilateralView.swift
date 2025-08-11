@@ -52,14 +52,13 @@ final class QuadrilateralView: UIView {
                 ? UIColor(white: 0.0, alpha: 0.55).cgColor
                 : UIColor.systemOrange.withAlphaComponent(0.35).cgColor
 
-            // Améliorer la visibilité du cadre en mode édition
+            // Supprimer le cadre en mode édition, garder seulement les coins visibles
             if editable {
-                quadLayer.lineWidth = 3.0
-                quadLayer.strokeColor = UIColor.systemBlue.cgColor
-                print("🟢 WeScan: Mode édition activé - bordure bleue visible")
+                quadLayer.lineWidth = 0.0
+                quadLayer.strokeColor = UIColor.clear.cgColor
+                print("🟢 WeScan: Mode édition activé - cadre supprimé")
             } else {
                 quadLayer.lineWidth = 2.0
-                // Si tu as déjà une couleur paramétrée via `strokeColor`, utilise-la. Sinon, fallback à orange.
                 quadLayer.strokeColor = self.strokeColor ?? UIColor.systemOrange.cgColor
                 print("🟠 WeScan: Mode normal - stroke activé")
             }
@@ -80,10 +79,12 @@ final class QuadrilateralView: UIView {
             if !editable {
                 quadLayer.strokeColor = strokeColor
             }
-            topLeftCornerView.strokeColor = strokeColor
-            topRightCornerView.strokeColor = strokeColor
-            bottomRightCornerView.strokeColor = strokeColor
-            bottomLeftCornerView.strokeColor = strokeColor
+            // Toujours garder les coins blancs pour une meilleure visibilité
+            let cornerColor = UIColor.white.cgColor
+            topLeftCornerView.strokeColor = cornerColor
+            topRightCornerView.strokeColor = cornerColor
+            bottomRightCornerView.strokeColor = cornerColor
+            bottomLeftCornerView.strokeColor = cornerColor
         }
     }
 
@@ -133,8 +134,8 @@ final class QuadrilateralView: UIView {
         setupConstraints()
         quadView.layer.addSublayer(quadLayer)
         quadLayer.fillRule = .evenOdd
-        // Propager la couleur aux coins via la propriété strokeColor
-        self.strokeColor = UIColor.systemOrange.cgColor
+        // Couleur neutre et visible pour les coins (style Vision Kit)
+        self.strokeColor = UIColor.white.cgColor
     }
 
     private func setupConstraints() {
