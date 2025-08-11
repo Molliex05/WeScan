@@ -23,8 +23,8 @@ final class QuadrilateralView: UIView {
 
     private let quadLayer: CAShapeLayer = {
         let layer = CAShapeLayer()
-        layer.strokeColor = UIColor.white.cgColor
-        layer.lineWidth = 1.0
+        layer.strokeColor = UIColor.systemOrange.cgColor
+        layer.lineWidth = 2.0
         layer.opacity = 1.0
         layer.isHidden = true
 
@@ -46,7 +46,9 @@ final class QuadrilateralView: UIView {
     public var editable = false {
         didSet {
             cornerViews(hidden: !editable)
-            quadLayer.fillColor = editable ? UIColor(white: 0.0, alpha: 0.6).cgColor : UIColor(white: 1.0, alpha: 0.5).cgColor
+            quadLayer.fillColor = editable
+             ? UIColor.systemOrange.withAlphaComponent(0.20).cgColor
+             : UIColor.systemOrange.withAlphaComponent(0.10).cgColor
             guard let quad else {
                 return
             }
@@ -71,7 +73,9 @@ final class QuadrilateralView: UIView {
             guard oldValue != isHighlighted else {
                 return
             }
-            quadLayer.fillColor = isHighlighted ? UIColor.clear.cgColor : UIColor(white: 0.0, alpha: 0.6).cgColor
+            quadLayer.fillColor = isHighlighted
+             ? UIColor.clear.cgColor
+             : UIColor.systemOrange.withAlphaComponent(0.20).cgColor
             if isHighlighted {
                 bringSubviewToFront(quadView)
             } else {
@@ -115,6 +119,8 @@ final class QuadrilateralView: UIView {
         setupCornerViews()
         setupConstraints()
         quadView.layer.addSublayer(quadLayer)
+        // Propager la couleur aux coins via la propriété strokeColor
+        self.strokeColor = UIColor.systemOrange.cgColor
     }
 
     private func setupConstraints() {
