@@ -17,7 +17,7 @@ final class EditScanViewController: UIViewController {
         imageView.clipsToBounds = true
         imageView.isOpaque = true
         imageView.image = image
-        imageView.backgroundColor = .systemBackground
+        imageView.backgroundColor = .clear
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -77,6 +77,10 @@ final class EditScanViewController: UIViewController {
         button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(confirmEditTapped), for: .touchUpInside)
+        
+        // S'assurer que le bouton reçoit les touches
+        button.isUserInteractionEnabled = true
+        button.layer.zPosition = 1000
         return button
     }()
 
@@ -94,7 +98,8 @@ final class EditScanViewController: UIViewController {
 
     override public func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        view.backgroundColor = .clear
         setupViews()
         setupConstraints()
         title = NSLocalizedString("wescan.edit.title",
