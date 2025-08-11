@@ -47,7 +47,7 @@ final class QuadrilateralView: UIView {
           didSet {
               cornerViews(hidden: !editable)
               quadLayer.fillColor = editable
-                  ? UIColor.systemOrange.withAlphaComponent(0.45).cgColor   // overlay orange (édition)
+                  ? UIColor(white: 0.0, alpha: 0.55).cgColor   // overlay orange (édition)
                   : UIColor.systemOrange.withAlphaComponent(0.35).cgColor   // overlay orange (normal)
               guard let quad else { return }
               drawQuad(quad, animated: false)
@@ -67,18 +67,14 @@ final class QuadrilateralView: UIView {
     }
 
     private var isHighlighted = false {
-          didSet(oldValue) {
-              guard oldValue != isHighlighted else { return }
-              quadLayer.fillColor = isHighlighted
-                  ? UIColor.clear.cgColor
-                  : UIColor.systemOrange.withAlphaComponent(0.45).cgColor
-              if isHighlighted {
-                  bringSubviewToFront(quadView)
-              } else {
-                 sendSubviewToBack(quadView)
-             }
-         }
-     }
+              didSet(oldValue) {
+                  guard oldValue != isHighlighted else { return }
+                  quadLayer.fillColor = isHighlighted
+                      ? UIColor.clear.cgColor
+                      : UIColor(white: 0.0, alpha: 0.55).cgColor      // Noir en édition
+                  if isHighlighted { bringSubviewToFront(quadView) } else { sendSubviewToBack(quadView) }
+              }
+          }
 
     private lazy var topLeftCornerView: EditScanCornerView = {
         return EditScanCornerView(frame: CGRect(origin: .zero, size: cornerViewSize), position: .topLeft)
