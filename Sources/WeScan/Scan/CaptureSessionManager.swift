@@ -170,8 +170,13 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     }
 
     internal func stop() {
-        captureSession.stopRunning()
-    }
+     2 │     DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+     3 │         guard let self = self else { return }
+     4 │         if self.captureSession.isRunning {
+     5 │             self.captureSession.stopRunning()
+     6 │         }
+     7 │     }
+     8 │ }
 
     internal func capturePhoto() {
         guard let connection = photoOutput.connection(with: .video), connection.isEnabled, connection.isActive else {
