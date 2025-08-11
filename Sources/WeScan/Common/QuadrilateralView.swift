@@ -44,16 +44,32 @@ final class QuadrilateralView: UIView {
     private(set) var quad: Quadrilateral?
 
     public var editable = false {
-          didSet {
-              cornerViews(hidden: !editable)
-              quadLayer.fillColor = editable
-                  ? UIColor(white: 0.0, alpha: 0.55).cgColor   // overlay orange (édition)
-                  : UIColor.systemOrange.withAlphaComponent(0.35).cgColor   // overlay orange (normal)
-              guard let quad else { return }
-              drawQuad(quad, animated: false)
-             layoutCornerViews(forQuad: quad)
-         }
-     }
+        didSet {
+            cornerViews(hidden: !editable)
+
+            // Overlay: noir en édition, orange en détection (ajuste les alpha à ton goût)
+            quadLayer.fillColor = editable
+                ? UIColor(white: 0.0, alpha: 0.55).cgColor
+                : UIColor.systemOrange.withAlphaComponent(0.35).cgColor
+
+            // IMPORTANT: enlever le trait (stroke) en mode édition pour supprimer le "border" plein écran
+            if editable {
+                quadLayer.lineWidth = 0.0
+                quadLayer.strokeColor = UIColor.clear.cgColor
+            } else {
+                quadLayer.lineWidth = 2.0
+                // Si tu as déjà une couleur paramétrée via `strokeColor`, utilise-la. Sinon, fallback à orange.
+                quadLayer.strokeColor = self.strokeColor ?? UIColor.systemOrange.cgColor
+            }
+
+            // (Optionnel mais recommandé, à placer une seule fois dans commonInit)
+            // quadLayer.fillRule = .evenOdd
+
+            guard let quad else { return }
+            drawQuad(quad, animated: false)
+            layoutCornerViews(forQuad: quad)
+        }
+    }
 
     /// Set stroke color of image rect and corner.
     public var strokeColor: CGColor? {
@@ -111,6 +127,7 @@ final class QuadrilateralView: UIView {
         setupCornerViews()
         setupConstraints()
         quadView.layer.addSublayer(quadLayer)
+        quadLayer.fillRule = .evenOdd
         // Propager la couleur aux coins via la propriété strokeColor
         self.strokeColor = UIColor.systemOrange.cgColor
     }
