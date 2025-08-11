@@ -52,11 +52,11 @@ final class QuadrilateralView: UIView {
                 ? UIColor(white: 0.0, alpha: 0.55).cgColor
                 : UIColor.systemOrange.withAlphaComponent(0.35).cgColor
 
-            // IMPORTANT: enlever le trait (stroke) en mode édition pour supprimer le "border" plein écran
+            // Améliorer la visibilité du cadre en mode édition
             if editable {
-                quadLayer.lineWidth = 0.0
-                quadLayer.strokeColor = UIColor.clear.cgColor
-                print("🟢 WeScan: Mode édition activé - stroke supprimé")
+                quadLayer.lineWidth = 3.0
+                quadLayer.strokeColor = UIColor.systemBlue.cgColor
+                print("🟢 WeScan: Mode édition activé - bordure bleue visible")
             } else {
                 quadLayer.lineWidth = 2.0
                 // Si tu as déjà une couleur paramétrée via `strokeColor`, utilise-la. Sinon, fallback à orange.
