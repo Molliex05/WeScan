@@ -44,16 +44,16 @@ final class QuadrilateralView: UIView {
     private(set) var quad: Quadrilateral?
 
     public var editable = false {
-             didSet {
-                 cornerViews(hidden: !editable)
-                 quadLayer.fillColor = editable
-                     ? UIColor(white: 0.0, alpha: 0.55).cgColor
-                     : UIColor(white: 1.0, alpha: 0.35).cgColor
-                 guard let quad else { return }
-                 drawQuad(quad, animated: false)
-                 layoutCornerViews(forQuad: quad)
-             }
+          didSet {
+              cornerViews(hidden: !editable)
+              quadLayer.fillColor = editable
+                  ? UIColor.systemOrange.withAlphaComponent(0.25).cgColor   // overlay orange (édition)
+                  : UIColor.systemOrange.withAlphaComponent(0.15).cgColor   // overlay orange (normal)
+              guard let quad else { return }
+              drawQuad(quad, animated: false)
+             layoutCornerViews(forQuad: quad)
          }
+     }
 
     /// Set stroke color of image rect and corner.
     public var strokeColor: CGColor? {
