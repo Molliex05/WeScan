@@ -119,6 +119,7 @@ final class EditScanViewController: UIViewController {
 
         let touchDown = UILongPressGestureRecognizer(target: zoomGestureController, action: #selector(zoomGestureController.handle(pan:)))
         touchDown.minimumPressDuration = 0
+        touchDown.delegate = self
         view.addGestureRecognizer(touchDown)
     }
 
@@ -216,8 +217,10 @@ final class EditScanViewController: UIViewController {
             enhancedScan: enhancedScan
         )
 
-        let reviewViewController = ReviewViewController(results: results)
-        navigationController?.pushViewController(reviewViewController, animated: true)
+        // Appel direct du delegate pour supprimer l'écran de review
+        if let imageScannerController = navigationController as? ImageScannerController {
+            imageScannerController.imageScannerDelegate?.imageScannerController(imageScannerController, didFinishScanningWithResults: results)
+        }
     }
     
     @objc private func confirmEditTapped() {
@@ -260,4 +263,12 @@ final class EditScanViewController: UIViewController {
         return quad
     }
 
+}
+
+// MARK: - UIGestureRecognizerDelegate
+extension EditScanViewController: UIGestureRecognizerDelegate {
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        // Ne pas traiter les touches sur le bouton Valider
+        return touch.view != confirmButton
+    }
 }
