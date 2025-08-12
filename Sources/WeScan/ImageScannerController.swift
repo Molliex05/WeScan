@@ -70,7 +70,7 @@ public final class ImageScannerController: UINavigationController {
         } else {
             navigationBar.tintColor = .black
         }
-        navigationBar.isTranslucent = false
+        navigationBar.isTranslucent = true
         self.view.addSubview(blackFlashView)
         setupConstraints()
 

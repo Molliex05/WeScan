@@ -99,13 +99,7 @@ final class EditScanViewController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
         
-        view.backgroundColor = .black
-        
-        // Navigation bar transparente pour que l'image se voie derrière
-        navigationController?.navigationBar.isTranslucent = true
-        navigationController?.navigationBar.backgroundColor = UIColor.clear
-        navigationController?.navigationBar.setBackgroundImage(UIImage(), for: .default)
-        navigationController?.navigationBar.shadowImage = UIImage()
+        view.backgroundColor = .clear
         setupViews()
         setupConstraints()
         title = NSLocalizedString("wescan.edit.title",
