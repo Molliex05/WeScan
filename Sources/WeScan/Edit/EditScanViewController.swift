@@ -18,7 +18,7 @@ final class EditScanViewController: UIViewController {
         imageView.isOpaque = true
         imageView.image = image
         imageView.backgroundColor = .clear
-        imageView.contentMode = .scaleAspectFit
+        imageView.contentMode = .scaleAspectFill
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
     }()
@@ -147,7 +147,7 @@ final class EditScanViewController: UIViewController {
 
     private func setupConstraints() {
         let imageViewConstraints = [
-            imageView.topAnchor.constraint(equalTo: view.topAnchor),
+            imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             view.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
             view.leadingAnchor.constraint(equalTo: imageView.leadingAnchor)
