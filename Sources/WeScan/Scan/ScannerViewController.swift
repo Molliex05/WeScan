@@ -72,7 +72,7 @@ public final class ScannerViewController: UIViewController {
         super.viewDidLoad()
 
         title = nil
-        view.backgroundColor = UIColor.black
+        view.backgroundColor = UIColor.clear
 
         setupViews()
         setupNavigationBar()
