@@ -69,9 +69,11 @@ final class EditScanViewController: UIViewController {
         let button = UIButton(type: .system)
         button.setTitle(NSLocalizedString("Valider", comment: ""), for: .normal)
         
-        // Couleurs modernes
-        button.backgroundColor = .systemOrange
-        button.setTitleColor(.white, for: .normal)
+        // Couleurs assets de l'app
+        let accent = UIColor(named: "AccentColor", in: .main, compatibleWith: nil) ?? .systemOrange
+        let textOnAccent = UIColor(named: "TextOnAccentColor", in: .main, compatibleWith: nil) ?? .white
+        button.backgroundColor = accent
+        button.setTitleColor(textOnAccent, for: .normal)
         button.layer.cornerRadius = 12
         button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
         button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)

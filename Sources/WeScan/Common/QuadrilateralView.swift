@@ -47,21 +47,16 @@ final class QuadrilateralView: UIView {
         didSet {
             cornerViews(hidden: !editable)
 
-            // Overlay: noir en édition, orange en détection (ajuste les alpha à ton goût)
+            // Édition: pas d'overlay (clear)
+            // Détection (non-édition): garde orange léger
             quadLayer.fillColor = editable
-                ? UIColor(white: 0.0, alpha: 0.55).cgColor
+                ? UIColor.clear.cgColor
                 : UIColor.systemOrange.withAlphaComponent(0.35).cgColor
 
-            // Supprimer le cadre en mode édition, garder seulement les coins visibles
-            if editable {
-                quadLayer.lineWidth = 0.0
-                quadLayer.strokeColor = UIColor.clear.cgColor
-                print("🟢 WeScan: Mode édition activé - cadre supprimé")
-            } else {
-                quadLayer.lineWidth = 2.0
-                quadLayer.strokeColor = self.strokeColor ?? UIColor.systemOrange.cgColor
-                print("🟠 WeScan: Mode normal - stroke activé")
-            }
+            // Garder le contour en édition pour la visibilité
+            quadLayer.lineWidth = 2.0
+            quadLayer.strokeColor = self.strokeColor ?? UIColor.systemOrange.cgColor
+            print(editable ? "🟢 WeScan: Mode édition - contour visible" : "🟠 WeScan: Mode normal")
 
             // (Optionnel mais recommandé, à placer une seule fois dans commonInit)
             // quadLayer.fillRule = .evenOdd
@@ -91,10 +86,8 @@ final class QuadrilateralView: UIView {
     private var isHighlighted = false {
               didSet(oldValue) {
                   guard oldValue != isHighlighted else { return }
-                  // Garder l'overlay même en highlighted pour maintenir le repère visuel
-                  quadLayer.fillColor = isHighlighted
-                      ? UIColor(white: 0.0, alpha: 0.3).cgColor      // Plus léger quand highlighted
-                      : UIColor(white: 0.0, alpha: 0.55).cgColor     // Normal en édition
+                  // Pas d'overlay même en highlighted pour un rendu propre
+                  quadLayer.fillColor = UIColor.clear.cgColor
                   if isHighlighted { bringSubviewToFront(quadView) } else { sendSubviewToBack(quadView) }
               }
           }
@@ -135,8 +128,9 @@ final class QuadrilateralView: UIView {
         setupConstraints()
         quadView.layer.addSublayer(quadLayer)
         quadLayer.fillRule = .evenOdd
-        // Couleur orange par défaut pour le mode scan
-        self.strokeColor = UIColor.systemOrange.cgColor
+        // Couleur accent de l'app pour harmonie
+        let accentColor = UIColor(named: "AccentColor", in: .main, compatibleWith: nil) ?? UIColor.systemOrange
+        self.strokeColor = accentColor.cgColor
     }
 
     private func setupConstraints() {
@@ -187,11 +181,8 @@ final class QuadrilateralView: UIView {
     private func drawQuad(_ quad: Quadrilateral, animated: Bool) {
         var path = quad.path
 
-        if editable {
-            path = path.reversing()
-            let rectPath = UIBezierPath(rect: bounds)
-            path.append(rectPath)
-        }
+        // Ne pas inverser le path en édition pour éviter l'overlay plein écran
+        // L'inversion causait le voile noir au-dessus de la photo
 
         if animated == true {
             let pathAnimation = CABasicAnimation(keyPath: "path")
