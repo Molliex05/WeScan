@@ -37,7 +37,9 @@ public final class ScannerViewController: UIViewController {
 
     private lazy var cancelButton: UIButton = {
         let button = UIButton()
-        button.setTitle(WeScanLocalization.localizedString(for: .scanningCancel, fallback: "Cancel"), for: .normal)
+        let cancelTitle = WeScanLocalization.localizedString(for: .scanningCancel, fallback: "Cancel")
+        print("🔧 ScannerViewController: Setting cancel button title to: '\(cancelTitle)'")
+        button.setTitle(cancelTitle, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(cancelImageScannerController), for: .touchUpInside)
         return button
@@ -45,6 +47,7 @@ public final class ScannerViewController: UIViewController {
 
     private lazy var autoScanButton: UIBarButtonItem = {
         let title = WeScanLocalization.localizedString(for: .auto, fallback: "Auto")
+        print("🔧 ScannerViewController: Setting auto button title to: '\(title)'")
         let button = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector(toggleAutoScan))
         button.tintColor = .white
 

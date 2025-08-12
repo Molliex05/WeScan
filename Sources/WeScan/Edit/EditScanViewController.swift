@@ -62,7 +62,9 @@ final class EditScanViewController: UIViewController {
     
     private lazy var confirmButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(WeScanLocalization.localizedString(for: .confirm, fallback: "Valider"), for: .normal)
+        let confirmTitle = WeScanLocalization.localizedString(for: .confirm, fallback: "Valider")
+        print("🔧 EditScanViewController: Setting confirm button title to: '\(confirmTitle)'")
+        button.setTitle(confirmTitle, for: .normal)
         
         // Couleurs modernes
         button.backgroundColor = .systemOrange
@@ -97,7 +99,9 @@ final class EditScanViewController: UIViewController {
         view.backgroundColor = .clear
         setupViews()
         setupConstraints()
-        title = WeScanLocalization.localizedString(for: .editScanTitle, fallback: "Edit Scan")
+        let editTitle = WeScanLocalization.localizedString(for: .editScanTitle, fallback: "Edit Scan")
+        print("🔧 EditScanViewController: Setting navigation title to: '\(editTitle)'")
+        title = editTitle
         navigationItem.rightBarButtonItem = nil // Supprimer le bouton Next en haut
         if let firstVC = self.navigationController?.viewControllers.first, firstVC == self {
             navigationItem.leftBarButtonItem = cancelButton

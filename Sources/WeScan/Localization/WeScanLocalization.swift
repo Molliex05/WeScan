@@ -42,10 +42,27 @@ public enum WeScanLocalization {
     }
     
     // The host app sets this provider at startup
-    public static weak var provider: WeScanLocalizationProviding?
+    public static weak var provider: WeScanLocalizationProviding? {
+        didSet {
+            if let provider = provider {
+                print("✅ WeScan Localization: Provider set successfully - \(type(of: provider))")
+            } else {
+                print("❌ WeScan Localization: Provider was unset")
+            }
+        }
+    }
     
     // Convenience method to get localized string with fallback
     public static func localizedString(for key: Key, fallback: String) -> String {
-        return provider?.localizedString(for: key) ?? fallback
+        print("🌐 WeScan Localization: Getting string for key \(key)")
+        
+        if let provider = provider {
+            let localizedString = provider.localizedString(for: key)
+            print("🌐 WeScan Localization: Provider returned: '\(localizedString)' for key \(key)")
+            return localizedString
+        } else {
+            print("⚠️ WeScan Localization: No provider set, using fallback: '\(fallback)' for key \(key)")
+            return fallback
+        }
     }
 }
