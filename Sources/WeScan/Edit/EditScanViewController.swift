@@ -43,12 +43,7 @@ final class EditScanViewController: UIViewController {
     }()
 
     private lazy var cancelButton: UIBarButtonItem = {
-        let title = NSLocalizedString("wescan.scanning.cancel",
-                                      tableName: nil,
-                                      bundle: Bundle(for: EditScanViewController.self),
-                                      value: "Cancel",
-                                      comment: "A generic cancel button"
-        )
+        let title = WeScanLocalization.localizedString(for: .cancel, fallback: "Cancel")
         let button = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector(cancelButtonTapped))
         button.tintColor = navigationController?.navigationBar.tintColor
         return button
@@ -67,7 +62,7 @@ final class EditScanViewController: UIViewController {
     
     private lazy var confirmButton: UIButton = {
         let button = UIButton(type: .system)
-        button.setTitle(NSLocalizedString("Valider", comment: ""), for: .normal)
+        button.setTitle(WeScanLocalization.localizedString(for: .confirm, fallback: "Valider"), for: .normal)
         
         // Couleurs modernes
         button.backgroundColor = .systemOrange
@@ -102,12 +97,7 @@ final class EditScanViewController: UIViewController {
         view.backgroundColor = .clear
         setupViews()
         setupConstraints()
-        title = NSLocalizedString("wescan.edit.title",
-                                  tableName: nil,
-                                  bundle: Bundle(for: EditScanViewController.self),
-                                  value: "Edit Scan",
-                                  comment: "The title of the EditScanViewController"
-        )
+        title = WeScanLocalization.localizedString(for: .editScanTitle, fallback: "Edit Scan")
         navigationItem.rightBarButtonItem = nil // Supprimer le bouton Next en haut
         if let firstVC = self.navigationController?.viewControllers.first, firstVC == self {
             navigationItem.leftBarButtonItem = cancelButton
