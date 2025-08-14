@@ -513,43 +513,43 @@ public final class ScannerViewController: UIViewController {
     private func convertPDFToImage(from url: URL) -> UIImage? {
         print("📄 ScannerViewController: Converting PDF to image from: \(url.lastPathComponent)")
 
-        guard let pdfDocument = PDFDocument(url: url),
-              let pdfPage = pdfDocument.page(at: 0) else {
+        guard let document = PDFDocument(url: url),
+              let page = document.page(at: 0) else {
             print("❌ ScannerViewController: Could not load PDF document")
             return nil
         }
 
-        let pageRect = pdfPage.bounds(for: .mediaBox)
-        let scale: CGFloat = 2.0
-        let targetSize = CGSize(width: pageRect.width * scale, height: pageRect.height * scale)
+        // Determine target rendering size while preserving original aspect
+        let pageSize = page.bounds(for: .mediaBox).size
+        let maxDimension: CGFloat = 2200
+        let longSide = max(pageSize.width, pageSize.height)
+        let scale = min(maxDimension / max(longSide, 1), 4.0)
+        let targetSize = CGSize(width: pageSize.width * scale, height: pageSize.height * scale)
 
-        let renderer = UIGraphicsImageRenderer(size: targetSize)
-        let image = renderer.image { rendererContext in
-            let ctx = rendererContext.cgContext
-
-            // White background
-            ctx.setFillColor(UIColor.white.cgColor)
-            ctx.fill(CGRect(origin: .zero, size: targetSize))
-
-            // Flip coordinate system (Quartz PDF has origin bottom-left)
-            ctx.saveGState()
-            ctx.translateBy(x: 0, y: targetSize.height)
-            ctx.scaleBy(x: scale, y: -scale)
-
-            // Apply page rotation if any
-            let rotation = CGFloat(pdfPage.rotation) * .pi / 180
-            if rotation != 0 {
-                ctx.translateBy(x: pageRect.midX, y: pageRect.midY)
-                ctx.rotate(by: rotation)
-                ctx.translateBy(x: -pageRect.midX, y: -pageRect.midY)
-            }
-
-            pdfPage.draw(with: .mediaBox, to: ctx)
-            ctx.restoreGState()
+        // Option A: Use PDFKit thumbnail (handles transforms/rotation/boxes)
+        let thumbnail = page.thumbnail(of: targetSize, for: .mediaBox)
+        if thumbnail.size.width > 1, thumbnail.size.height > 1 {
+            print("✅ ScannerViewController: PDF converted via thumbnail with size: \(thumbnail.size)")
+            return thumbnail
         }
 
-        print("✅ ScannerViewController: PDF converted to image with size: \(image.size)")
-        return image
+        // Option B: Manual rendering using getDrawingTransform as a robust fallback
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        let rendered = renderer.image { ctx in
+            let cg = ctx.cgContext
+            cg.setFillColor(UIColor.white.cgColor)
+            cg.fill(CGRect(origin: .zero, size: targetSize))
+
+            cg.saveGState()
+            let drawingRect = CGRect(origin: .zero, size: targetSize)
+            let transform = page.getDrawingTransform(.mediaBox, rect: drawingRect, rotate: 0, preserveAspectRatio: true)
+            cg.concatenate(transform)
+            page.draw(with: .mediaBox, to: cg)
+            cg.restoreGState()
+        }
+
+        print("✅ ScannerViewController: PDF converted via transform with size: \(rendered.size)")
+        return rendered
     }
 
 }
