@@ -66,10 +66,14 @@ final class EditScanViewController: UIViewController {
         print("🔧 EditScanViewController: Setting confirm button title to: '\(confirmTitle)'")
         button.setTitle(confirmTitle, for: .normal)
         
-        // Couleurs modernes
-        button.backgroundColor = .systemOrange
+        // Glutax V2 theme colors
+        button.backgroundColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 12
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowRadius = 4
+        button.layer.shadowOpacity = 0.1
         button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
         button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -117,6 +121,17 @@ final class EditScanViewController: UIViewController {
         view.addGestureRecognizer(touchDown)
     }
 
+    override public func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        // Disable interactive swipe-back to avoid accidental pop when dragging the left corner
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+    }
+
+    override public func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+    }
+
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         adjustQuadViewConstraints()
@@ -129,6 +144,9 @@ final class EditScanViewController: UIViewController {
         // Work around for an iOS 11.2 bug where UIBarButtonItems don't get back to their normal state after being pressed.
         navigationController?.navigationBar.tintAdjustmentMode = .normal
         navigationController?.navigationBar.tintAdjustmentMode = .automatic
+
+        // Re-enable interactive swipe-back for other screens
+        navigationController?.interactivePopGestureRecognizer?.isEnabled = true
     }
 
     // MARK: - Setups
