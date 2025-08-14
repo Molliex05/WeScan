@@ -10,6 +10,7 @@
 import AVFoundation
 import UIKit
 import UniformTypeIdentifiers
+import PDFKit
 
 /// The `ScannerViewController` offers an interface to give feedback to the user regarding quadrilaterals that are detected. It also gives the user the opportunity to capture an image with a detected rectangle.
 public final class ScannerViewController: UIViewController {
@@ -87,32 +88,32 @@ public final class ScannerViewController: UIViewController {
     
     private lazy var filesButton: UIButton = {
         let button = UIButton(type: .system)
-        let image = UIImage(systemName: "folder") ?? UIImage(systemName: "doc")
+        let image = UIImage(systemName: "folder.fill") ?? UIImage(systemName: "doc")
         button.setImage(image, for: .normal)
-        button.setTitle("Files", for: .normal)
         button.tintColor = .white
-        button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.8)
-        button.layer.cornerRadius = 20
+        button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.9)
+        button.layer.cornerRadius = 22
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(openFiles), for: .touchUpInside)
         button.alpha = 0
         button.isHidden = true
+        button.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         print("📁 ScannerViewController: Files button created")
         return button
     }()
     
     private lazy var photosButton: UIButton = {
         let button = UIButton(type: .system)
-        let image = UIImage(systemName: "photo.on.rectangle") ?? UIImage(systemName: "photo")
+        let image = UIImage(systemName: "photo.fill") ?? UIImage(systemName: "photo")
         button.setImage(image, for: .normal)
-        button.setTitle("Photos", for: .normal)
         button.tintColor = .white
-        button.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.8)
-        button.layer.cornerRadius = 20
+        button.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.9)
+        button.layer.cornerRadius = 22
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(openPhotos), for: .touchUpInside)
         button.alpha = 0
         button.isHidden = true
+        button.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         print("📸 ScannerViewController: Photos button created")
         return button
     }()
@@ -364,51 +365,85 @@ public final class ScannerViewController: UIViewController {
     }
     
     private func showImportOptions() {
-        print("📱 ScannerViewController: Showing import options")
+        print("📱 ScannerViewController: Showing import options with modern animation")
         isImportMenuOpen = true
         
+        // Transform import button to X with rotation animation
+        let xImage = UIImage(systemName: "xmark") ?? UIImage(systemName: "multiply")
+        
+        // Show buttons
         filesButton.isHidden = false
         photosButton.isHidden = false
         
-        // Position buttons above import button
+        // Position buttons above import button (icons only, smaller)
         NSLayoutConstraint.activate([
             filesButton.centerXAnchor.constraint(equalTo: importButton.centerXAnchor),
-            filesButton.bottomAnchor.constraint(equalTo: importButton.topAnchor, constant: -60),
-            filesButton.widthAnchor.constraint(equalToConstant: 80),
-            filesButton.heightAnchor.constraint(equalToConstant: 40),
+            filesButton.bottomAnchor.constraint(equalTo: importButton.topAnchor, constant: -70),
+            filesButton.widthAnchor.constraint(equalToConstant: 44),
+            filesButton.heightAnchor.constraint(equalToConstant: 44),
             
             photosButton.centerXAnchor.constraint(equalTo: importButton.centerXAnchor),
-            photosButton.bottomAnchor.constraint(equalTo: filesButton.topAnchor, constant: -15),
-            photosButton.widthAnchor.constraint(equalToConstant: 80),
-            photosButton.heightAnchor.constraint(equalToConstant: 40)
+            photosButton.bottomAnchor.constraint(equalTo: filesButton.topAnchor, constant: -20),
+            photosButton.widthAnchor.constraint(equalToConstant: 44),
+            photosButton.heightAnchor.constraint(equalToConstant: 44)
         ])
         
-        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
+        // Modern spring animation
+        UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: [.curveEaseOut]) {
+            // Transform import button to X
+            self.importButton.setImage(xImage, for: .normal)
+            self.importButton.transform = CGAffineTransform(rotationAngle: .pi * 0.25)
+            
+            // Animate buttons in with scale and alpha
             self.filesButton.alpha = 1
             self.photosButton.alpha = 1
+            self.filesButton.transform = CGAffineTransform.identity
+            self.photosButton.transform = CGAffineTransform.identity
+        } completion: { _ in
+            // Add subtle bounce effect
+            UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
+                self.importButton.transform = CGAffineTransform(rotationAngle: .pi * 0.25).scaledBy(x: 1.1, y: 1.1)
+            } completion: { _ in
+                UIView.animate(withDuration: 0.1) {
+                    self.importButton.transform = CGAffineTransform(rotationAngle: .pi * 0.25)
+                }
+            }
         }
         
-        print("✨ ScannerViewController: Import options animated in")
+        print("✨ ScannerViewController: Modern import options animated in")
     }
     
     private func hideImportOptions() {
-        print("📱 ScannerViewController: Hiding import options")
+        print("📱 ScannerViewController: Hiding import options with reverse animation")
         isImportMenuOpen = false
         
-        UIView.animate(withDuration: 0.2, animations: {
+        let originalImage = UIImage(systemName: "photo.on.rectangle.angled") ?? UIImage(systemName: "photo")
+        
+        // Reverse spring animation
+        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.3, options: [.curveEaseIn]) {
+            // Transform back to original button
+            self.importButton.setImage(originalImage, for: .normal)
+            self.importButton.transform = CGAffineTransform.identity
+            
+            // Scale down and fade out buttons
             self.filesButton.alpha = 0
             self.photosButton.alpha = 0
-        }) { _ in
+            self.filesButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+            self.photosButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+        } completion: { _ in
             self.filesButton.isHidden = true
             self.photosButton.isHidden = true
-            // Remove constraints to avoid conflicts
+            // Clean up constraints
             self.filesButton.removeFromSuperview()
             self.photosButton.removeFromSuperview()
             self.view.addSubview(self.filesButton)
             self.view.addSubview(self.photosButton)
+            // Reset transforms for next time
+            self.filesButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
+            self.photosButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         }
         
-        print("✨ ScannerViewController: Import options animated out")
+        print("✨ ScannerViewController: Modern import options animated out")
     }
     
     @objc private func openFiles() {
@@ -416,17 +451,17 @@ public final class ScannerViewController: UIViewController {
         hideImportOptions()
         
         if #available(iOS 14.0, *) {
-            let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.image], asCopy: true)
+            let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.image, UTType.pdf], asCopy: true)
             documentPicker.delegate = self
             documentPicker.allowsMultipleSelection = false
             present(documentPicker, animated: true)
-            print("📄 ScannerViewController: Document picker presented (iOS 14+)")
+            print("📄 ScannerViewController: Document picker presented with PDF support (iOS 14+)")
         } else {
-            let documentPicker = UIDocumentPickerViewController(documentTypes: ["public.image"], in: .import)
+            let documentPicker = UIDocumentPickerViewController(documentTypes: ["public.image", "com.adobe.pdf"], in: .import)
             documentPicker.delegate = self
             documentPicker.allowsMultipleSelection = false
             present(documentPicker, animated: true)
-            print("📄 ScannerViewController: Document picker presented (iOS <14)")
+            print("📄 ScannerViewController: Document picker presented with PDF support (iOS <14)")
         }
     }
     
@@ -456,6 +491,43 @@ public final class ScannerViewController: UIViewController {
         
         print("✅ ScannerViewController: Using imported image in scanner controller")
         imageScannerController.useImage(image: image)
+    }
+    
+    private func convertPDFToImage(from url: URL) -> UIImage? {
+        print("📄 ScannerViewController: Converting PDF to image from: \(url.lastPathComponent)")
+        
+        guard let pdfDocument = PDFDocument(url: url),
+              let pdfPage = pdfDocument.page(at: 0) else {
+            print("❌ ScannerViewController: Could not load PDF document")
+            return nil
+        }
+        
+        let pageRect = pdfPage.bounds(for: .mediaBox)
+        let scale: CGFloat = 2.0 // High resolution
+        let scaledRect = CGRect(x: 0, y: 0, width: pageRect.width * scale, height: pageRect.height * scale)
+        
+        UIGraphicsBeginImageContextWithOptions(scaledRect.size, false, 0.0)
+        guard let context = UIGraphicsGetCurrentContext() else {
+            print("❌ ScannerViewController: Could not create graphics context")
+            return nil
+        }
+        
+        // Fill white background
+        context.setFillColor(UIColor.white.cgColor)
+        context.fill(scaledRect)
+        
+        // Scale and render PDF
+        context.scaleBy(x: scale, y: scale)
+        pdfPage.draw(with: .mediaBox, to: context)
+        
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        if let image = image {
+            print("✅ ScannerViewController: PDF converted to image with size: \(image.size)")
+        }
+        
+        return image
     }
 
 }
@@ -530,7 +602,17 @@ extension ScannerViewController: UIDocumentPickerDelegate {
             
             do {
                 let imageData = try Data(contentsOf: url)
-                if let image = UIImage(data: imageData) {
+                
+                // Check if it's a PDF first
+                if url.pathExtension.lowercased() == "pdf" {
+                    print("📄 ScannerViewController: Processing PDF file")
+                    if let image = convertPDFToImage(from: url) {
+                        print("✅ ScannerViewController: Successfully converted PDF to image")
+                        processImportedImage(image)
+                    } else {
+                        print("❌ ScannerViewController: Could not convert PDF to image")
+                    }
+                } else if let image = UIImage(data: imageData) {
                     print("✅ ScannerViewController: Successfully loaded image from file")
                     processImportedImage(image)
                 } else {
