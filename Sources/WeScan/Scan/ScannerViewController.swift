@@ -78,11 +78,15 @@ public final class ScannerViewController: UIViewController {
         let image = UIImage(systemName: "plus") ?? UIImage(systemName: "add")
         button.setImage(image, for: .normal)
         button.tintColor = .white
-        button.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        button.backgroundColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
         button.layer.cornerRadius = 25
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowRadius = 4
+        button.layer.shadowOpacity = 0.1
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(importButtonTapped), for: .touchUpInside)
-        print("📱 ScannerViewController: Import button created with plus icon")
+        print("📱 ScannerViewController: Import button created with Glutax AccentColor")
         return button
     }()
     
@@ -90,15 +94,19 @@ public final class ScannerViewController: UIViewController {
         let button = UIButton(type: .system)
         let image = UIImage(systemName: "folder.fill") ?? UIImage(systemName: "doc")
         button.setImage(image, for: .normal)
-        button.tintColor = .white
-        button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.9)
+        button.tintColor = UIColor(named: "TextPrimaryColor") ?? UIColor.label
+        button.backgroundColor = UIColor(named: "CardBackgroundColor") ?? UIColor.systemBackground
         button.layer.cornerRadius = 22
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowRadius = 4
+        button.layer.shadowOpacity = 0.1
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(openFiles), for: .touchUpInside)
         button.alpha = 0
         button.isHidden = true
         button.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
-        print("📁 ScannerViewController: Files button created")
+        print("📁 ScannerViewController: Files button created with Glutax theme")
         return button
     }()
     
@@ -106,15 +114,19 @@ public final class ScannerViewController: UIViewController {
         let button = UIButton(type: .system)
         let image = UIImage(systemName: "photo.fill") ?? UIImage(systemName: "photo")
         button.setImage(image, for: .normal)
-        button.tintColor = .white
-        button.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.9)
+        button.tintColor = UIColor(named: "TextPrimaryColor") ?? UIColor.label
+        button.backgroundColor = UIColor(named: "CardBackgroundColor") ?? UIColor.systemBackground
         button.layer.cornerRadius = 22
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowRadius = 4
+        button.layer.shadowOpacity = 0.1
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(openPhotos), for: .touchUpInside)
         button.alpha = 0
         button.isHidden = true
         button.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
-        print("📸 ScannerViewController: Photos button created")
+        print("📸 ScannerViewController: Photos button created with Glutax theme")
         return button
     }()
     
