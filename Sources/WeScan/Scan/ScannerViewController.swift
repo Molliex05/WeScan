@@ -533,7 +533,7 @@ public final class ScannerViewController: UIViewController {
             return thumbnail
         }
 
-        // Option B: Manual rendering using getDrawingTransform as a robust fallback
+        // Option B: Manual rendering using PDFPage.transform(for:to:) as a robust fallback
         let renderer = UIGraphicsImageRenderer(size: targetSize)
         let rendered = renderer.image { ctx in
             let cg = ctx.cgContext
@@ -542,7 +542,7 @@ public final class ScannerViewController: UIViewController {
 
             cg.saveGState()
             let drawingRect = CGRect(origin: .zero, size: targetSize)
-            let transform = page.getDrawingTransform(.mediaBox, rect: drawingRect, rotate: 0, preserveAspectRatio: true)
+            let transform = page.transform(for: .mediaBox, to: drawingRect)
             cg.concatenate(transform)
             page.draw(with: .mediaBox, to: cg)
             cg.restoreGState()
