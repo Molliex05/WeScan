@@ -9,6 +9,7 @@
 
 import AVFoundation
 import UIKit
+import UniformTypeIdentifiers
 
 /// The `ScannerViewController` offers an interface to give feedback to the user regarding quadrilaterals that are detected. It also gives the user the opportunity to capture an image with a detected rectangle.
 public final class ScannerViewController: UIViewController {
@@ -68,6 +69,56 @@ public final class ScannerViewController: UIViewController {
         activityIndicator.translatesAutoresizingMaskIntoConstraints = false
         return activityIndicator
     }()
+
+    // MARK: - Import Button System
+    
+    private lazy var importButton: UIButton = {
+        let button = UIButton(type: .system)
+        let image = UIImage(systemName: "photo.on.rectangle.angled") ?? UIImage(systemName: "photo")
+        button.setImage(image, for: .normal)
+        button.tintColor = .white
+        button.backgroundColor = UIColor.black.withAlphaComponent(0.6)
+        button.layer.cornerRadius = 25
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(importButtonTapped), for: .touchUpInside)
+        print("📱 ScannerViewController: Import button created")
+        return button
+    }()
+    
+    private lazy var filesButton: UIButton = {
+        let button = UIButton(type: .system)
+        let image = UIImage(systemName: "folder") ?? UIImage(systemName: "doc")
+        button.setImage(image, for: .normal)
+        button.setTitle("Files", for: .normal)
+        button.tintColor = .white
+        button.backgroundColor = UIColor.systemBlue.withAlphaComponent(0.8)
+        button.layer.cornerRadius = 20
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(openFiles), for: .touchUpInside)
+        button.alpha = 0
+        button.isHidden = true
+        print("📁 ScannerViewController: Files button created")
+        return button
+    }()
+    
+    private lazy var photosButton: UIButton = {
+        let button = UIButton(type: .system)
+        let image = UIImage(systemName: "photo.on.rectangle") ?? UIImage(systemName: "photo")
+        button.setImage(image, for: .normal)
+        button.setTitle("Photos", for: .normal)
+        button.tintColor = .white
+        button.backgroundColor = UIColor.systemGreen.withAlphaComponent(0.8)
+        button.layer.cornerRadius = 20
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(openPhotos), for: .touchUpInside)
+        button.alpha = 0
+        button.isHidden = true
+        print("📸 ScannerViewController: Photos button created")
+        return button
+    }()
+    
+    private var isImportMenuOpen = false
+    private var importButtonConstraints: [NSLayoutConstraint] = []
 
     // MARK: - Life Cycle
 
@@ -130,6 +181,10 @@ public final class ScannerViewController: UIViewController {
         view.addSubview(cancelButton)
         view.addSubview(shutterButton)
         view.addSubview(activityIndicator)
+        view.addSubview(importButton)
+        view.addSubview(filesButton)
+        view.addSubview(photosButton)
+        print("🔧 ScannerViewController: All UI elements added to view")
     }
 
     private func setupNavigationBar() {
@@ -166,6 +221,8 @@ public final class ScannerViewController: UIViewController {
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ]
+        
+        setupImportButtonConstraints()
 
         if #available(iOS 11.0, *) {
             cancelButtonConstraints = [
@@ -185,7 +242,7 @@ public final class ScannerViewController: UIViewController {
             shutterButtonConstraints.append(shutterButtonBottomConstraint)
         }
 
-        NSLayoutConstraint.activate(quadViewConstraints + cancelButtonConstraints + shutterButtonConstraints + activityIndicatorConstraints)
+        NSLayoutConstraint.activate(quadViewConstraints + cancelButtonConstraints + shutterButtonConstraints + activityIndicatorConstraints + importButtonConstraints)
     }
 
     // MARK: - Tap to Focus
@@ -272,6 +329,134 @@ public final class ScannerViewController: UIViewController {
         guard let imageScannerController = navigationController as? ImageScannerController else { return }
         imageScannerController.imageScannerDelegate?.imageScannerControllerDidCancel(imageScannerController)
     }
+    
+    // MARK: - Import Button Setup
+    
+    private func setupImportButtonConstraints() {
+        if #available(iOS 11.0, *) {
+            importButtonConstraints = [
+                importButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24.0),
+                view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: importButton.bottomAnchor, constant: (65.0 / 2) - 10.0),
+                importButton.widthAnchor.constraint(equalToConstant: 50.0),
+                importButton.heightAnchor.constraint(equalToConstant: 50.0)
+            ]
+        } else {
+            importButtonConstraints = [
+                importButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24.0),
+                view.bottomAnchor.constraint(equalTo: importButton.bottomAnchor, constant: (65.0 / 2) - 10.0),
+                importButton.widthAnchor.constraint(equalToConstant: 50.0),
+                importButton.heightAnchor.constraint(equalToConstant: 50.0)
+            ]
+        }
+        print("📐 ScannerViewController: Import button constraints setup")
+    }
+
+    // MARK: - Import Actions
+    
+    @objc private func importButtonTapped() {
+        print("🎯 ScannerViewController: Import button tapped, isMenuOpen: \(isImportMenuOpen)")
+        
+        if isImportMenuOpen {
+            hideImportOptions()
+        } else {
+            showImportOptions()
+        }
+    }
+    
+    private func showImportOptions() {
+        print("📱 ScannerViewController: Showing import options")
+        isImportMenuOpen = true
+        
+        filesButton.isHidden = false
+        photosButton.isHidden = false
+        
+        // Position buttons above import button
+        NSLayoutConstraint.activate([
+            filesButton.centerXAnchor.constraint(equalTo: importButton.centerXAnchor),
+            filesButton.bottomAnchor.constraint(equalTo: importButton.topAnchor, constant: -60),
+            filesButton.widthAnchor.constraint(equalToConstant: 80),
+            filesButton.heightAnchor.constraint(equalToConstant: 40),
+            
+            photosButton.centerXAnchor.constraint(equalTo: importButton.centerXAnchor),
+            photosButton.bottomAnchor.constraint(equalTo: filesButton.topAnchor, constant: -15),
+            photosButton.widthAnchor.constraint(equalToConstant: 80),
+            photosButton.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        
+        UIView.animate(withDuration: 0.3, delay: 0, options: .curveEaseOut) {
+            self.filesButton.alpha = 1
+            self.photosButton.alpha = 1
+        }
+        
+        print("✨ ScannerViewController: Import options animated in")
+    }
+    
+    private func hideImportOptions() {
+        print("📱 ScannerViewController: Hiding import options")
+        isImportMenuOpen = false
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            self.filesButton.alpha = 0
+            self.photosButton.alpha = 0
+        }) { _ in
+            self.filesButton.isHidden = true
+            self.photosButton.isHidden = true
+            // Remove constraints to avoid conflicts
+            self.filesButton.removeFromSuperview()
+            self.photosButton.removeFromSuperview()
+            self.view.addSubview(self.filesButton)
+            self.view.addSubview(self.photosButton)
+        }
+        
+        print("✨ ScannerViewController: Import options animated out")
+    }
+    
+    @objc private func openFiles() {
+        print("📁 ScannerViewController: Opening file picker")
+        hideImportOptions()
+        
+        if #available(iOS 14.0, *) {
+            let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.image], asCopy: true)
+            documentPicker.delegate = self
+            documentPicker.allowsMultipleSelection = false
+            present(documentPicker, animated: true)
+            print("📄 ScannerViewController: Document picker presented (iOS 14+)")
+        } else {
+            let documentPicker = UIDocumentPickerViewController(documentTypes: ["public.image"], in: .import)
+            documentPicker.delegate = self
+            documentPicker.allowsMultipleSelection = false
+            present(documentPicker, animated: true)
+            print("📄 ScannerViewController: Document picker presented (iOS <14)")
+        }
+    }
+    
+    @objc private func openPhotos() {
+        print("📸 ScannerViewController: Opening photo picker")
+        hideImportOptions()
+        
+        if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+            let imagePicker = UIImagePickerController()
+            imagePicker.delegate = self
+            imagePicker.sourceType = .photoLibrary
+            imagePicker.allowsEditing = false
+            present(imagePicker, animated: true)
+            print("📷 ScannerViewController: Image picker presented")
+        } else {
+            print("❌ ScannerViewController: Photo library not available")
+        }
+    }
+    
+    private func processImportedImage(_ image: UIImage) {
+        print("🖼️ ScannerViewController: Processing imported image of size: \(image.size)")
+        
+        guard let imageScannerController = navigationController as? ImageScannerController else {
+            print("❌ ScannerViewController: Could not get ImageScannerController")
+            return
+        }
+        
+        print("✅ ScannerViewController: Using imported image in scanner controller")
+        imageScannerController.useImage(image: image)
+    }
 
 }
 
@@ -325,4 +510,63 @@ extension ScannerViewController: RectangleDetectionDelegateProtocol {
         quadView.drawQuadrilateral(quad: transformedQuad, animated: true)
     }
 
+}
+
+// MARK: - UIDocumentPickerDelegate
+
+extension ScannerViewController: UIDocumentPickerDelegate {
+    public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        print("📄 ScannerViewController: Document picker did pick documents: \(urls)")
+        
+        guard let url = urls.first else {
+            print("❌ ScannerViewController: No URL selected")
+            return
+        }
+        
+        print("📁 ScannerViewController: Loading image from URL: \(url.lastPathComponent)")
+        
+        if url.startAccessingSecurityScopedResource() {
+            defer { url.stopAccessingSecurityScopedResource() }
+            
+            do {
+                let imageData = try Data(contentsOf: url)
+                if let image = UIImage(data: imageData) {
+                    print("✅ ScannerViewController: Successfully loaded image from file")
+                    processImportedImage(image)
+                } else {
+                    print("❌ ScannerViewController: Could not create UIImage from file data")
+                }
+            } catch {
+                print("❌ ScannerViewController: Error loading file: \(error.localizedDescription)")
+            }
+        } else {
+            print("❌ ScannerViewController: Could not access security scoped resource")
+        }
+    }
+    
+    public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        print("📄 ScannerViewController: Document picker was cancelled")
+    }
+}
+
+// MARK: - UIImagePickerControllerDelegate
+
+extension ScannerViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    public func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
+        print("📸 ScannerViewController: Image picker did finish picking")
+        
+        picker.dismiss(animated: true) {
+            if let image = info[.originalImage] as? UIImage {
+                print("✅ ScannerViewController: Successfully got image from photo library")
+                self.processImportedImage(image)
+            } else {
+                print("❌ ScannerViewController: Could not get image from picker")
+            }
+        }
+    }
+    
+    public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        print("📸 ScannerViewController: Image picker was cancelled")
+        picker.dismiss(animated: true)
+    }
 }
