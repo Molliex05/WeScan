@@ -595,40 +595,75 @@ extension ScannerViewController: UIDocumentPickerDelegate {
             return
         }
         
-        print("📁 ScannerViewController: Loading image from URL: \(url.lastPathComponent)")
+        print("📁 ScannerViewController: Loading file from URL: \(url.lastPathComponent)")
+        print("🌍 ScannerViewController: Full URL path: \(url.path)")
+        print("📂 ScannerViewController: URL is file URL: \(url.isFileURL)")
         
-        // Try to access as security scoped resource first (for external files)
-        let needsSecurityScope = url.startAccessingSecurityScopedResource()
-        defer { 
-            if needsSecurityScope {
-                url.stopAccessingSecurityScopedResource() 
-            }
-        }
+        // Multiple approaches to handle different file locations
+        var fileProcessed = false
         
-        print("🔐 ScannerViewController: Security scope needed: \(needsSecurityScope)")
-        
+        // Approach 1: Direct file access (works for Inbox files)
         do {
-            // Check if it's a PDF first
+            print("🔄 ScannerViewController: Trying direct file access...")
+            
             if url.pathExtension.lowercased() == "pdf" {
-                print("📄 ScannerViewController: Processing PDF file")
+                print("📄 ScannerViewController: Processing PDF file directly")
                 if let image = convertPDFToImage(from: url) {
-                    print("✅ ScannerViewController: Successfully converted PDF to image")
+                    print("✅ ScannerViewController: Successfully converted PDF to image (direct access)")
                     processImportedImage(image)
+                    fileProcessed = true
                 } else {
-                    print("❌ ScannerViewController: Could not convert PDF to image")
+                    print("⚠️ ScannerViewController: Direct PDF conversion failed, trying with security scope...")
                 }
             } else {
-                // For images, read data and convert
                 let imageData = try Data(contentsOf: url)
                 if let image = UIImage(data: imageData) {
-                    print("✅ ScannerViewController: Successfully loaded image from file")
+                    print("✅ ScannerViewController: Successfully loaded image from file (direct access)")
                     processImportedImage(image)
+                    fileProcessed = true
                 } else {
-                    print("❌ ScannerViewController: Could not create UIImage from file data")
+                    print("⚠️ ScannerViewController: Direct image loading failed, trying with security scope...")
                 }
             }
         } catch {
-            print("❌ ScannerViewController: Error loading file: \(error.localizedDescription)")
+            print("⚠️ ScannerViewController: Direct access failed: \(error.localizedDescription). Trying security scoped access...")
+        }
+        
+        // Approach 2: Security scoped resource access (for external files)
+        if !fileProcessed {
+            print("🔐 ScannerViewController: Attempting security scoped resource access...")
+            let needsSecurityScope = url.startAccessingSecurityScopedResource()
+            defer { 
+                if needsSecurityScope {
+                    url.stopAccessingSecurityScopedResource() 
+                }
+            }
+            
+            print("🔑 ScannerViewController: Security scope granted: \(needsSecurityScope)")
+            
+            do {
+                if url.pathExtension.lowercased() == "pdf" {
+                    print("📄 ScannerViewController: Processing PDF file with security scope")
+                    if let image = convertPDFToImage(from: url) {
+                        print("✅ ScannerViewController: Successfully converted PDF to image (security scoped)")
+                        processImportedImage(image)
+                        fileProcessed = true
+                    }
+                } else {
+                    let imageData = try Data(contentsOf: url)
+                    if let image = UIImage(data: imageData) {
+                        print("✅ ScannerViewController: Successfully loaded image (security scoped)")
+                        processImportedImage(image)
+                        fileProcessed = true
+                    }
+                }
+            } catch {
+                print("❌ ScannerViewController: Security scoped access also failed: \(error.localizedDescription)")
+            }
+        }
+        
+        if !fileProcessed {
+            print("❌ ScannerViewController: All file access methods failed for: \(url.lastPathComponent)")
         }
     }
     
