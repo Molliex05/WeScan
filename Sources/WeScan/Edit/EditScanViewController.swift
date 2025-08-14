@@ -143,8 +143,8 @@ final class EditScanViewController: UIViewController {
         let imageViewConstraints = [
             imageView.topAnchor.constraint(equalTo: view.topAnchor),
             imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            view.bottomAnchor.constraint(equalTo: imageView.bottomAnchor),
-            view.leadingAnchor.constraint(equalTo: imageView.leadingAnchor)
+            imageView.bottomAnchor.constraint(equalTo: confirmButton.topAnchor, constant: -12),
+            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
         ]
 
         quadViewWidthConstraint = quadView.widthAnchor.constraint(equalToConstant: 0.0)
@@ -152,7 +152,7 @@ final class EditScanViewController: UIViewController {
 
         let quadViewConstraints = [
             quadView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            quadView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            quadView.centerYAnchor.constraint(equalTo: imageView.centerYAnchor),
             quadViewWidthConstraint,
             quadViewHeightConstraint
         ]
@@ -160,8 +160,8 @@ final class EditScanViewController: UIViewController {
         let confirmButtonConstraints = [
             confirmButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             confirmButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
-            confirmButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -12),
-            confirmButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 56)
+            confirmButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            confirmButton.heightAnchor.constraint(equalToConstant: 56)
         ]
         
         NSLayoutConstraint.activate(quadViewConstraints + imageViewConstraints + confirmButtonConstraints)
@@ -240,7 +240,9 @@ final class EditScanViewController: UIViewController {
     /// Since there is no way to know the size of that image before run time, we adjust the constraints
     /// to make sure that the quadView is on top of the displayed image.
     private func adjustQuadViewConstraints() {
-        let frame = AVMakeRect(aspectRatio: image.size, insideRect: imageView.bounds)
+        // Leave safe space above the confirm button to avoid overlap for tall documents
+        let availableBounds = imageView.bounds.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: 8, right: 0))
+        let frame = AVMakeRect(aspectRatio: image.size, insideRect: availableBounds)
         quadViewWidthConstraint.constant = frame.size.width
         quadViewHeightConstraint.constant = frame.size.height
     }
