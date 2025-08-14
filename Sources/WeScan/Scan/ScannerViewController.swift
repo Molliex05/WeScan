@@ -18,8 +18,8 @@ public final class ScannerViewController: UIViewController {
     private var captureSessionManager: CaptureSessionManager?
     private let videoPreviewLayer = AVCaptureVideoPreviewLayer()
 
-    /// The view that shows the focus rectangle (when the user taps to focus, similar to the Camera app)
-    private var focusRectangle: FocusRectangleView!
+    /// (Disabled) Previously showed a yellow focus rectangle on tap
+    private var focusRectangle: FocusRectangleView?
 
     /// The view that draws the detected rectangles.
     private let quadView = QuadrilateralView()
@@ -260,22 +260,17 @@ public final class ScannerViewController: UIViewController {
             return
         }
 
-        /// Remove the focus rectangle if one exists
-        CaptureSession.current.removeFocusRectangleIfNeeded(focusRectangle, animated: true)
+        /// Previously removed the focus rectangle if one existed. Feature disabled.
     }
 
     override public func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         super.touchesBegan(touches, with: event)
 
-        guard  let touch = touches.first else { return }
+        guard let touch = touches.first else { return }
         let touchPoint = touch.location(in: view)
         let convertedTouchPoint: CGPoint = videoPreviewLayer.captureDevicePointConverted(fromLayerPoint: touchPoint)
 
-        CaptureSession.current.removeFocusRectangleIfNeeded(focusRectangle, animated: false)
-
-        focusRectangle = FocusRectangleView(touchPoint: touchPoint)
-        view.addSubview(focusRectangle)
-
+        // Hide visual focus rectangle UX. Keep tap-to-focus behavior only.
         do {
             try CaptureSession.current.setFocusPointToTapPoint(convertedTouchPoint)
         } catch {
