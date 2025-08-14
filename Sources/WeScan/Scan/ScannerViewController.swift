@@ -533,7 +533,7 @@ public final class ScannerViewController: UIViewController {
             return thumbnail
         }
 
-        // Option B: Manual rendering using PDFPage.transform(for:to:) as a robust fallback
+        // Option B: Manual rendering with explicit fit and coordinate flip (robust fallback)
         let renderer = UIGraphicsImageRenderer(size: targetSize)
         let rendered = renderer.image { ctx in
             let cg = ctx.cgContext
@@ -541,9 +541,24 @@ public final class ScannerViewController: UIViewController {
             cg.fill(CGRect(origin: .zero, size: targetSize))
 
             cg.saveGState()
-            let drawingRect = CGRect(origin: .zero, size: targetSize)
-            let transform = page.transform(for: .mediaBox, to: drawingRect)
-            cg.concatenate(transform)
+            let pageRect = page.bounds(for: .mediaBox)
+            // Compute aspect-fit scale and centering offsets
+            let scaleX = targetSize.width / max(pageRect.width, 1)
+            let scaleY = targetSize.height / max(pageRect.height, 1)
+            let fitScale = min(scaleX, scaleY)
+            let fittedWidth = pageRect.width * fitScale
+            let fittedHeight = pageRect.height * fitScale
+            let offsetX = (targetSize.width - fittedWidth) / 2
+            let offsetY = (targetSize.height - fittedHeight) / 2
+
+            // Flip Y-axis to match PDF coordinate system, then center, scale, and normalize page origin
+            cg.translateBy(x: 0, y: targetSize.height)
+            cg.scaleBy(x: 1, y: -1)
+            cg.translateBy(x: offsetX, y: offsetY)
+            cg.scaleBy(x: fitScale, y: fitScale)
+            cg.translateBy(x: -pageRect.origin.x, y: -pageRect.origin.y)
+
+            // Draw the page
             page.draw(with: .mediaBox, to: cg)
             cg.restoreGState()
         }
