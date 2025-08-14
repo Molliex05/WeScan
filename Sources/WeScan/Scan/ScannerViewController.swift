@@ -493,6 +493,16 @@ public final class ScannerViewController: UIViewController {
         imageScannerController.useImage(image: image)
     }
     
+    private func isPDF(url: URL) -> Bool {
+        if url.pathExtension.lowercased() == "pdf" { return true }
+        if #available(iOS 14.0, *) {
+            if let type = UTType(filenameExtension: url.pathExtension), type.conforms(to: .pdf) {
+                return true
+            }
+        }
+        return false
+    }
+
     private func convertPDFToImage(from url: URL) -> UIImage? {
         print("📄 ScannerViewController: Converting PDF to image from: \(url.lastPathComponent)")
         
@@ -589,81 +599,50 @@ extension ScannerViewController: RectangleDetectionDelegateProtocol {
 extension ScannerViewController: UIDocumentPickerDelegate {
     public func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         print("📄 ScannerViewController: Document picker did pick documents: \(urls)")
-        
+
         guard let url = urls.first else {
             print("❌ ScannerViewController: No URL selected")
             return
         }
-        
-        print("📁 ScannerViewController: Loading file from URL: \(url.lastPathComponent)")
-        print("🌍 ScannerViewController: Full URL path: \(url.path)")
-        print("📂 ScannerViewController: URL is file URL: \(url.isFileURL)")
-        
-        // Multiple approaches to handle different file locations
-        var fileProcessed = false
-        
-        // Approach 1: Direct file access (works for Inbox files)
-        do {
-            print("🔄 ScannerViewController: Trying direct file access...")
-            
-            if url.pathExtension.lowercased() == "pdf" {
-                print("📄 ScannerViewController: Processing PDF file directly")
-                if let image = convertPDFToImage(from: url) {
-                    print("✅ ScannerViewController: Successfully converted PDF to image (direct access)")
-                    processImportedImage(image)
-                    fileProcessed = true
-                } else {
-                    print("⚠️ ScannerViewController: Direct PDF conversion failed, trying with security scope...")
+
+        // Dismiss the picker before heavy work to avoid UI transition conflicts
+        controller.dismiss(animated: true) {
+            print("📁 ScannerViewController: Loading file from URL: \(url.lastPathComponent)")
+            print("🌍 ScannerViewController: Full URL path: \(url.path)")
+            print("📂 ScannerViewController: URL is file URL: \(url.isFileURL)")
+
+            // Kick off import on a background queue to keep UI responsive
+            self.activityIndicator.startAnimating()
+
+            DispatchQueue.global(qos: .userInitiated).async {
+                let didStartScope = url.startAccessingSecurityScopedResource()
+                defer {
+                    if didStartScope { url.stopAccessingSecurityScopedResource() }
                 }
-            } else {
-                let imageData = try Data(contentsOf: url)
-                if let image = UIImage(data: imageData) {
-                    print("✅ ScannerViewController: Successfully loaded image from file (direct access)")
-                    processImportedImage(image)
-                    fileProcessed = true
+
+                var importedImage: UIImage?
+
+                if self.isPDF(url: url) {
+                    print("📄 ScannerViewController: Detected PDF, converting to image…")
+                    importedImage = self.convertPDFToImage(from: url)
                 } else {
-                    print("⚠️ ScannerViewController: Direct image loading failed, trying with security scope...")
-                }
-            }
-        } catch {
-            print("⚠️ ScannerViewController: Direct access failed: \(error.localizedDescription). Trying security scoped access...")
-        }
-        
-        // Approach 2: Security scoped resource access (for external files)
-        if !fileProcessed {
-            print("🔐 ScannerViewController: Attempting security scoped resource access...")
-            let needsSecurityScope = url.startAccessingSecurityScopedResource()
-            defer { 
-                if needsSecurityScope {
-                    url.stopAccessingSecurityScopedResource() 
-                }
-            }
-            
-            print("🔑 ScannerViewController: Security scope granted: \(needsSecurityScope)")
-            
-            do {
-                if url.pathExtension.lowercased() == "pdf" {
-                    print("📄 ScannerViewController: Processing PDF file with security scope")
-                    if let image = convertPDFToImage(from: url) {
-                        print("✅ ScannerViewController: Successfully converted PDF to image (security scoped)")
-                        processImportedImage(image)
-                        fileProcessed = true
-                    }
-                } else {
-                    let imageData = try Data(contentsOf: url)
-                    if let image = UIImage(data: imageData) {
-                        print("✅ ScannerViewController: Successfully loaded image (security scoped)")
-                        processImportedImage(image)
-                        fileProcessed = true
+                    do {
+                        let data = try Data(contentsOf: url)
+                        importedImage = UIImage(data: data)
+                    } catch {
+                        print("❌ ScannerViewController: Failed reading file data: \(error.localizedDescription)")
                     }
                 }
-            } catch {
-                print("❌ ScannerViewController: Security scoped access also failed: \(error.localizedDescription)")
+
+                DispatchQueue.main.async {
+                    self.activityIndicator.stopAnimating()
+                    if let image = importedImage {
+                        self.processImportedImage(image)
+                    } else {
+                        print("❌ ScannerViewController: Could not import file: \(url.lastPathComponent)")
+                    }
+                }
             }
-        }
-        
-        if !fileProcessed {
-            print("❌ ScannerViewController: All file access methods failed for: \(url.lastPathComponent)")
         }
     }
     
