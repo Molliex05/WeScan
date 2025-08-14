@@ -75,14 +75,14 @@ public final class ScannerViewController: UIViewController {
     
     private lazy var importButton: UIButton = {
         let button = UIButton(type: .system)
-        let image = UIImage(systemName: "photo.on.rectangle.angled") ?? UIImage(systemName: "photo")
+        let image = UIImage(systemName: "plus") ?? UIImage(systemName: "add")
         button.setImage(image, for: .normal)
         button.tintColor = .white
         button.backgroundColor = UIColor.black.withAlphaComponent(0.6)
         button.layer.cornerRadius = 25
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(importButtonTapped), for: .touchUpInside)
-        print("📱 ScannerViewController: Import button created")
+        print("📱 ScannerViewController: Import button created with plus icon")
         return button
     }()
     
@@ -370,15 +370,15 @@ public final class ScannerViewController: UIViewController {
         filesButton.isHidden = false
         photosButton.isHidden = false
         
-        // Position buttons above import button (icons only, smaller)
+        // Position buttons above import button (closer positioning)
         NSLayoutConstraint.activate([
             filesButton.centerXAnchor.constraint(equalTo: importButton.centerXAnchor),
-            filesButton.bottomAnchor.constraint(equalTo: importButton.topAnchor, constant: -70),
+            filesButton.bottomAnchor.constraint(equalTo: importButton.topAnchor, constant: -20),
             filesButton.widthAnchor.constraint(equalToConstant: 44),
             filesButton.heightAnchor.constraint(equalToConstant: 44),
             
             photosButton.centerXAnchor.constraint(equalTo: importButton.centerXAnchor),
-            photosButton.bottomAnchor.constraint(equalTo: filesButton.topAnchor, constant: -20),
+            photosButton.bottomAnchor.constraint(equalTo: filesButton.topAnchor, constant: -15),
             photosButton.widthAnchor.constraint(equalToConstant: 44),
             photosButton.heightAnchor.constraint(equalToConstant: 44)
         ])
@@ -412,7 +412,7 @@ public final class ScannerViewController: UIViewController {
         print("📱 ScannerViewController: Hiding import options with reverse animation")
         isImportMenuOpen = false
         
-        let originalImage = UIImage(systemName: "photo.on.rectangle.angled") ?? UIImage(systemName: "photo")
+        let originalImage = UIImage(systemName: "plus") ?? UIImage(systemName: "add")
         
         // Reverse spring animation
         UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.3, options: [.curveEaseIn]) {
