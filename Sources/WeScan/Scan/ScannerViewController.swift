@@ -597,32 +597,38 @@ extension ScannerViewController: UIDocumentPickerDelegate {
         
         print("📁 ScannerViewController: Loading image from URL: \(url.lastPathComponent)")
         
-        if url.startAccessingSecurityScopedResource() {
-            defer { url.stopAccessingSecurityScopedResource() }
-            
-            do {
+        // Try to access as security scoped resource first (for external files)
+        let needsSecurityScope = url.startAccessingSecurityScopedResource()
+        defer { 
+            if needsSecurityScope {
+                url.stopAccessingSecurityScopedResource() 
+            }
+        }
+        
+        print("🔐 ScannerViewController: Security scope needed: \(needsSecurityScope)")
+        
+        do {
+            // Check if it's a PDF first
+            if url.pathExtension.lowercased() == "pdf" {
+                print("📄 ScannerViewController: Processing PDF file")
+                if let image = convertPDFToImage(from: url) {
+                    print("✅ ScannerViewController: Successfully converted PDF to image")
+                    processImportedImage(image)
+                } else {
+                    print("❌ ScannerViewController: Could not convert PDF to image")
+                }
+            } else {
+                // For images, read data and convert
                 let imageData = try Data(contentsOf: url)
-                
-                // Check if it's a PDF first
-                if url.pathExtension.lowercased() == "pdf" {
-                    print("📄 ScannerViewController: Processing PDF file")
-                    if let image = convertPDFToImage(from: url) {
-                        print("✅ ScannerViewController: Successfully converted PDF to image")
-                        processImportedImage(image)
-                    } else {
-                        print("❌ ScannerViewController: Could not convert PDF to image")
-                    }
-                } else if let image = UIImage(data: imageData) {
+                if let image = UIImage(data: imageData) {
                     print("✅ ScannerViewController: Successfully loaded image from file")
                     processImportedImage(image)
                 } else {
                     print("❌ ScannerViewController: Could not create UIImage from file data")
                 }
-            } catch {
-                print("❌ ScannerViewController: Error loading file: \(error.localizedDescription)")
             }
-        } else {
-            print("❌ ScannerViewController: Could not access security scoped resource")
+        } catch {
+            print("❌ ScannerViewController: Error loading file: \(error.localizedDescription)")
         }
     }
     
