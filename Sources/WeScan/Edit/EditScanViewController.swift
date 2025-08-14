@@ -257,6 +257,15 @@ final class EditScanViewController: UIViewController {
         return quad
     }
 
+    /// A full-frame quad that matches the complete image bounds.
+    static func fullFrameQuad(forImage image: UIImage) -> Quadrilateral {
+        let topLeft = CGPoint(x: 0, y: 0)
+        let topRight = CGPoint(x: image.size.width, y: 0)
+        let bottomRight = CGPoint(x: image.size.width, y: image.size.height)
+        let bottomLeft = CGPoint(x: 0, y: image.size.height)
+        return Quadrilateral(topLeft: topLeft, topRight: topRight, bottomRight: bottomRight, bottomLeft: bottomLeft)
+    }
+
 }
 
 // MARK: - UIGestureRecognizerDelegate

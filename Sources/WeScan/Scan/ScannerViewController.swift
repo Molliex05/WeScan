@@ -481,7 +481,7 @@ public final class ScannerViewController: UIViewController {
         }
     }
     
-    private func processImportedImage(_ image: UIImage) {
+    private func processImportedImage(_ image: UIImage, preferFullFrameQuad: Bool = false) {
         print("🖼️ ScannerViewController: Processing imported image of size: \(image.size)")
         
         guard let imageScannerController = navigationController as? ImageScannerController else {
@@ -490,7 +490,7 @@ public final class ScannerViewController: UIViewController {
         }
         
         print("✅ ScannerViewController: Using imported image in scanner controller")
-        imageScannerController.useImage(image: image)
+        imageScannerController.useImage(image: image, preferFullFrameQuad: preferFullFrameQuad)
     }
     
     private func isPDF(url: URL) -> Bool {
@@ -505,38 +505,43 @@ public final class ScannerViewController: UIViewController {
 
     private func convertPDFToImage(from url: URL) -> UIImage? {
         print("📄 ScannerViewController: Converting PDF to image from: \(url.lastPathComponent)")
-        
+
         guard let pdfDocument = PDFDocument(url: url),
               let pdfPage = pdfDocument.page(at: 0) else {
             print("❌ ScannerViewController: Could not load PDF document")
             return nil
         }
-        
+
         let pageRect = pdfPage.bounds(for: .mediaBox)
-        let scale: CGFloat = 2.0 // High resolution
-        let scaledRect = CGRect(x: 0, y: 0, width: pageRect.width * scale, height: pageRect.height * scale)
-        
-        UIGraphicsBeginImageContextWithOptions(scaledRect.size, false, 0.0)
-        guard let context = UIGraphicsGetCurrentContext() else {
-            print("❌ ScannerViewController: Could not create graphics context")
-            return nil
+        let scale: CGFloat = 2.0
+        let targetSize = CGSize(width: pageRect.width * scale, height: pageRect.height * scale)
+
+        let renderer = UIGraphicsImageRenderer(size: targetSize)
+        let image = renderer.image { rendererContext in
+            let ctx = rendererContext.cgContext
+
+            // White background
+            ctx.setFillColor(UIColor.white.cgColor)
+            ctx.fill(CGRect(origin: .zero, size: targetSize))
+
+            // Flip coordinate system (Quartz PDF has origin bottom-left)
+            ctx.saveGState()
+            ctx.translateBy(x: 0, y: targetSize.height)
+            ctx.scaleBy(x: scale, y: -scale)
+
+            // Apply page rotation if any
+            let rotation = CGFloat(pdfPage.rotation) * .pi / 180
+            if rotation != 0 {
+                ctx.translateBy(x: pageRect.midX, y: pageRect.midY)
+                ctx.rotate(by: rotation)
+                ctx.translateBy(x: -pageRect.midX, y: -pageRect.midY)
+            }
+
+            pdfPage.draw(with: .mediaBox, to: ctx)
+            ctx.restoreGState()
         }
-        
-        // Fill white background
-        context.setFillColor(UIColor.white.cgColor)
-        context.fill(scaledRect)
-        
-        // Scale and render PDF
-        context.scaleBy(x: scale, y: scale)
-        pdfPage.draw(with: .mediaBox, to: context)
-        
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        if let image = image {
-            print("✅ ScannerViewController: PDF converted to image with size: \(image.size)")
-        }
-        
+
+        print("✅ ScannerViewController: PDF converted to image with size: \(image.size)")
         return image
     }
 
@@ -637,7 +642,9 @@ extension ScannerViewController: UIDocumentPickerDelegate {
                 DispatchQueue.main.async {
                     self.activityIndicator.stopAnimating()
                     if let image = importedImage {
-                        self.processImportedImage(image)
+                        // When importing a PDF, prefer a full-frame quad, since documents may already be cropped.
+                        let preferFullFrame = self.isPDF(url: url)
+                        self.processImportedImage(image, preferFullFrameQuad: preferFullFrame)
                     } else {
                         print("❌ ScannerViewController: Could not import file: \(url.lastPathComponent)")
                     }

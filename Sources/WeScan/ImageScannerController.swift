@@ -114,13 +114,14 @@ public final class ImageScannerController: UINavigationController {
         }
     }
 
-    public func useImage(image: UIImage) {
+    public func useImage(image: UIImage, preferFullFrameQuad: Bool = false) {
         guard topViewController is ScannerViewController else { return }
 
         detect(image: image) { [weak self] detectedQuad in
             guard let self else { return }
-            let editViewController = EditScanViewController(image: image, quad: detectedQuad, rotateImage: false)
-            self.setViewControllers([editViewController], animated: true)
+            let quadToUse: Quadrilateral? = preferFullFrameQuad ? EditScanViewController.fullFrameQuad(forImage: image) : detectedQuad
+            let editViewController = EditScanViewController(image: image, quad: quadToUse, rotateImage: false)
+            self.pushViewController(editViewController, animated: true)
         }
     }
 
