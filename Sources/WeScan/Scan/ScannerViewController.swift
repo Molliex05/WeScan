@@ -47,20 +47,25 @@ public final class ScannerViewController: UIViewController {
         return button
     }()
 
-    private lazy var autoScanButton: UIBarButtonItem = {
+    private lazy var autoScanButton: UIButton = {
+        let button = UIButton(type: .system)
         let title = WeScanLocalization.localizedString(for: .auto, fallback: "Auto")
         print("🔧 ScannerViewController: Setting auto button title to: '\(title)'")
-        let button = UIBarButtonItem(title: title, style: .plain, target: self, action: #selector(toggleAutoScan))
-        button.tintColor = .white
-
+        button.setTitle(title, for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 17)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(toggleAutoScan), for: .touchUpInside)
         return button
     }()
 
-    private lazy var flashButton: UIBarButtonItem = {
+    private lazy var flashButton: UIButton = {
+        let button = UIButton(type: .system)
         let image = UIImage(systemName: "bolt.fill", named: "flash", in: Bundle(for: ScannerViewController.self), compatibleWith: nil)
-        let button = UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(toggleFlash))
+        button.setImage(image, for: .normal)
         button.tintColor = .white
-
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(toggleFlash), for: .touchUpInside)
         return button
     }()
 
@@ -161,7 +166,8 @@ public final class ScannerViewController: UIViewController {
         captureSessionManager?.start()
         UIApplication.shared.isIdleTimerDisabled = true
 
-        navigationController?.navigationBar.barStyle = .blackTranslucent
+        // Hide navigation bar for full screen experience
+        navigationController?.setNavigationBarHidden(true, animated: animated)
     }
 
     override public func viewDidLayoutSubviews() {
@@ -174,6 +180,8 @@ public final class ScannerViewController: UIViewController {
         super.viewWillDisappear(animated)
         UIApplication.shared.isIdleTimerDisabled = false
 
+        // Show navigation bar when leaving
+        navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.isTranslucent = false
         navigationController?.navigationBar.barStyle = originalBarStyle ?? .default
         captureSessionManager?.stop()
@@ -186,7 +194,7 @@ public final class ScannerViewController: UIViewController {
     // MARK: - Setups
 
     private func setupViews() {
-        view.backgroundColor = .darkGray
+        view.backgroundColor = .black
         view.layer.addSublayer(videoPreviewLayer)
         quadView.translatesAutoresizingMaskIntoConstraints = false
         quadView.editable = false
@@ -197,16 +205,18 @@ public final class ScannerViewController: UIViewController {
         view.addSubview(importButton)
         view.addSubview(filesButton)
         view.addSubview(photosButton)
+        view.addSubview(flashButton)
+        view.addSubview(autoScanButton)
         print("🔧 ScannerViewController: All UI elements added to view")
     }
 
     private func setupNavigationBar() {
-        navigationItem.setLeftBarButton(flashButton, animated: false)
-        navigationItem.setRightBarButton(autoScanButton, animated: false)
-
+        // Navigation bar is now hidden for full screen experience
+        // Flash and auto buttons are added directly to the view
+        
         if UIImagePickerController.isFlashAvailable(for: .rear) == false {
             let flashOffImage = UIImage(systemName: "bolt.slash.fill", named: "flashUnavailable", in: Bundle(for: ScannerViewController.self), compatibleWith: nil)
-            flashButton.image = flashOffImage
+            flashButton.setImage(flashOffImage, for: .normal)
             flashButton.tintColor = UIColor.lightGray
         }
     }
@@ -216,6 +226,8 @@ public final class ScannerViewController: UIViewController {
         var cancelButtonConstraints = [NSLayoutConstraint]()
         var shutterButtonConstraints = [NSLayoutConstraint]()
         var activityIndicatorConstraints = [NSLayoutConstraint]()
+        var flashButtonConstraints = [NSLayoutConstraint]()
+        var autoScanButtonConstraints = [NSLayoutConstraint]()
 
         quadViewConstraints = [
             quadView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -245,6 +257,21 @@ public final class ScannerViewController: UIViewController {
 
             let shutterButtonBottomConstraint = view.safeAreaLayoutGuide.bottomAnchor.constraint(equalTo: shutterButton.bottomAnchor, constant: 8.0)
             shutterButtonConstraints.append(shutterButtonBottomConstraint)
+            
+            // Flash button constraints (top left)
+            flashButtonConstraints = [
+                flashButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24.0),
+                flashButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16.0),
+                flashButton.widthAnchor.constraint(equalToConstant: 44.0),
+                flashButton.heightAnchor.constraint(equalToConstant: 44.0)
+            ]
+            
+            // Auto scan button constraints (top right)
+            autoScanButtonConstraints = [
+                autoScanButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24.0),
+                autoScanButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16.0),
+                autoScanButton.heightAnchor.constraint(equalToConstant: 44.0)
+            ]
         } else {
             cancelButtonConstraints = [
                 cancelButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 24.0),
@@ -253,9 +280,24 @@ public final class ScannerViewController: UIViewController {
 
             let shutterButtonBottomConstraint = view.bottomAnchor.constraint(equalTo: shutterButton.bottomAnchor, constant: 8.0)
             shutterButtonConstraints.append(shutterButtonBottomConstraint)
+            
+            // Flash button constraints (top left) - fallback for older iOS
+            flashButtonConstraints = [
+                flashButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24.0),
+                flashButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 40.0),
+                flashButton.widthAnchor.constraint(equalToConstant: 44.0),
+                flashButton.heightAnchor.constraint(equalToConstant: 44.0)
+            ]
+            
+            // Auto scan button constraints (top right) - fallback for older iOS
+            autoScanButtonConstraints = [
+                autoScanButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24.0),
+                autoScanButton.topAnchor.constraint(equalTo: view.topAnchor, constant: 40.0),
+                autoScanButton.heightAnchor.constraint(equalToConstant: 44.0)
+            ]
         }
 
-        NSLayoutConstraint.activate(quadViewConstraints + cancelButtonConstraints + shutterButtonConstraints + activityIndicatorConstraints + importButtonConstraints)
+        NSLayoutConstraint.activate(quadViewConstraints + cancelButtonConstraints + shutterButtonConstraints + activityIndicatorConstraints + importButtonConstraints + flashButtonConstraints + autoScanButtonConstraints)
     }
 
     // MARK: - Tap to Focus
@@ -304,10 +346,10 @@ public final class ScannerViewController: UIViewController {
     @objc private func toggleAutoScan() {
         if CaptureSession.current.isAutoScanEnabled {
             CaptureSession.current.isAutoScanEnabled = false
-            autoScanButton.title = WeScanLocalization.localizedString(for: .manual, fallback: "Manual")
+            autoScanButton.setTitle(WeScanLocalization.localizedString(for: .manual, fallback: "Manual"), for: .normal)
         } else {
             CaptureSession.current.isAutoScanEnabled = true
-            autoScanButton.title = WeScanLocalization.localizedString(for: .auto, fallback: "Auto")
+            autoScanButton.setTitle(WeScanLocalization.localizedString(for: .auto, fallback: "Auto"), for: .normal)
         }
     }
 
@@ -320,15 +362,15 @@ public final class ScannerViewController: UIViewController {
         switch state {
         case .on:
             flashEnabled = true
-            flashButton.image = flashImage
+            flashButton.setImage(flashImage, for: .normal)
             flashButton.tintColor = .yellow
         case .off:
             flashEnabled = false
-            flashButton.image = flashImage
+            flashButton.setImage(flashImage, for: .normal)
             flashButton.tintColor = .white
         case .unknown, .unavailable:
             flashEnabled = false
-            flashButton.image = flashOffImage
+            flashButton.setImage(flashOffImage, for: .normal)
             flashButton.tintColor = UIColor.lightGray
         }
     }
