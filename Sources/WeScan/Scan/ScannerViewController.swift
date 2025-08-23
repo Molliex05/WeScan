@@ -364,6 +364,10 @@ public final class ScannerViewController: UIViewController {
     @objc private func importButtonTapped() {
         print("🎯 ScannerViewController: Import button tapped, isMenuOpen: \(isImportMenuOpen)")
         
+        // Light haptic feedback
+        let impactGenerator = UIImpactFeedbackGenerator(style: .light)
+        impactGenerator.impactOccurred()
+        
         if isImportMenuOpen {
             hideImportOptions()
         } else {
@@ -444,6 +448,11 @@ public final class ScannerViewController: UIViewController {
     
     @objc private func openFiles() {
         print("📁 ScannerViewController: Opening file picker")
+        
+        // Light haptic feedback
+        let impactGenerator = UIImpactFeedbackGenerator(style: .light)
+        impactGenerator.impactOccurred()
+        
         hideImportOptions()
         
         if #available(iOS 14.0, *) {
@@ -463,6 +472,11 @@ public final class ScannerViewController: UIViewController {
     
     @objc private func openPhotos() {
         print("📸 ScannerViewController: Opening photo picker")
+        
+        // Light haptic feedback
+        let impactGenerator = UIImpactFeedbackGenerator(style: .light)
+        impactGenerator.impactOccurred()
+        
         hideImportOptions()
         
         if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
