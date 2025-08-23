@@ -397,7 +397,7 @@ public final class ScannerViewController: UIViewController {
         ])
         
         // Simple animation with rotation only
-        UIView.animate(withDuration: 0.3, options: [.curveEaseInOut]) {
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut]) {
             // Rotate the X button (45 degrees)
             self.importButton.transform = CGAffineTransform(rotationAngle: .pi / 4)
             
@@ -418,7 +418,7 @@ public final class ScannerViewController: UIViewController {
         let originalImage = UIImage(systemName: "plus") ?? UIImage(systemName: "add")
         
         // Simple reverse animation
-        UIView.animate(withDuration: 0.3, options: [.curveEaseInOut]) {
+        UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut]) {
             // Transform back to original + button
             self.importButton.setImage(originalImage, for: .normal)
             self.importButton.transform = CGAffineTransform.identity
