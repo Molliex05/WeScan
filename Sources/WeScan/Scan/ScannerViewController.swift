@@ -144,7 +144,7 @@ public final class ScannerViewController: UIViewController {
         super.viewDidLoad()
 
         title = nil
-        view.backgroundColor = UIColor.clear
+        view.backgroundColor = UIColor.black
 
         setupViews()
         setupNavigationBar()
@@ -155,6 +155,14 @@ public final class ScannerViewController: UIViewController {
         originalBarStyle = navigationController?.navigationBar.barStyle
 
         NotificationCenter.default.addObserver(self, selector: #selector(subjectAreaDidChange), name: Notification.Name.AVCaptureDeviceSubjectAreaDidChange, object: nil)
+    }
+    
+    override public var prefersStatusBarHidden: Bool {
+        return true
+    }
+    
+    override public var preferredStatusBarUpdateAnimation: UIStatusBarAnimation {
+        return .fade
     }
 
     override public func viewWillAppear(_ animated: Bool) {

@@ -59,18 +59,33 @@ public final class ImageScannerController: UINavigationController {
     override public var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .portrait
     }
+    
+    override public var prefersStatusBarHidden: Bool {
+        return true
+    }
+    
+    override public var modalPresentationStyle: UIModalPresentationStyle {
+        get { return .fullScreen }
+        set { super.modalPresentationStyle = newValue }
+    }
 
     public required init(image: UIImage? = nil, delegate: ImageScannerControllerDelegate? = nil) {
         super.init(rootViewController: ScannerViewController())
 
         self.imageScannerDelegate = delegate
 
+        // Configure for full screen experience
         if #available(iOS 13.0, *) {
             navigationBar.tintColor = .label
         } else {
             navigationBar.tintColor = .black
         }
         navigationBar.isTranslucent = true
+        navigationBar.isHidden = true  // Hide navigation bar completely
+        
+        // Ensure full screen presentation
+        modalPresentationStyle = .fullScreen
+        
         self.view.addSubview(blackFlashView)
         setupConstraints()
 
