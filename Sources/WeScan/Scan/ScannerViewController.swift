@@ -375,8 +375,9 @@ public final class ScannerViewController: UIViewController {
         print("📱 ScannerViewController: Showing import options with modern animation")
         isImportMenuOpen = true
         
-        // Transform import button to X with rotation animation
+        // Transform import button to X immediately
         let xImage = UIImage(systemName: "xmark") ?? UIImage(systemName: "multiply")
+        importButton.setImage(xImage, for: .normal)
         
         // Show buttons
         filesButton.isHidden = false
@@ -397,8 +398,7 @@ public final class ScannerViewController: UIViewController {
         
         // Modern spring animation
         UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: [.curveEaseOut]) {
-            // Transform import button to X
-            self.importButton.setImage(xImage, for: .normal)
+            // Rotate the X button
             self.importButton.transform = CGAffineTransform(rotationAngle: .pi * 0.25)
             
             // Animate buttons in with scale and alpha
