@@ -396,10 +396,10 @@ public final class ScannerViewController: UIViewController {
             photosButton.heightAnchor.constraint(equalToConstant: 44)
         ])
         
-        // Simple animation with rotation only
+        // Simple animation without rotation on the X
         UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut]) {
-            // Rotate the X button (45 degrees)
-            self.importButton.transform = CGAffineTransform(rotationAngle: .pi / 4)
+            // Don't rotate the X - keep it as is to show clear X
+            // self.importButton.transform = CGAffineTransform.identity
             
             // Animate buttons in with scale and alpha
             self.filesButton.alpha = 1
