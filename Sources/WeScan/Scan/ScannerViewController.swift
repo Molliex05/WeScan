@@ -453,8 +453,6 @@ public final class ScannerViewController: UIViewController {
         let impactGenerator = UIImpactFeedbackGenerator(style: .light)
         impactGenerator.impactOccurred()
         
-        hideImportOptions()
-        
         if #available(iOS 14.0, *) {
             let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.image, UTType.pdf], asCopy: true)
             documentPicker.delegate = self
@@ -476,8 +474,6 @@ public final class ScannerViewController: UIViewController {
         // Light haptic feedback
         let impactGenerator = UIImpactFeedbackGenerator(style: .light)
         impactGenerator.impactOccurred()
-        
-        hideImportOptions()
         
         if UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
             let imagePicker = UIImagePickerController()
