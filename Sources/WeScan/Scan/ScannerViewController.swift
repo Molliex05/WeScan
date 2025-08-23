@@ -372,7 +372,7 @@ public final class ScannerViewController: UIViewController {
     }
     
     private func showImportOptions() {
-        print("📱 ScannerViewController: Showing import options with modern animation")
+        print("📱 ScannerViewController: Showing import options")
         isImportMenuOpen = true
         
         // Transform import button to X immediately
@@ -396,39 +396,30 @@ public final class ScannerViewController: UIViewController {
             photosButton.heightAnchor.constraint(equalToConstant: 44)
         ])
         
-        // Modern spring animation
-        UIView.animate(withDuration: 0.6, delay: 0, usingSpringWithDamping: 0.7, initialSpringVelocity: 0.5, options: [.curveEaseOut]) {
-            // Rotate the X button
-            self.importButton.transform = CGAffineTransform(rotationAngle: .pi * 0.25)
+        // Simple animation with rotation only
+        UIView.animate(withDuration: 0.3, options: [.curveEaseInOut]) {
+            // Rotate the X button (45 degrees)
+            self.importButton.transform = CGAffineTransform(rotationAngle: .pi / 4)
             
             // Animate buttons in with scale and alpha
             self.filesButton.alpha = 1
             self.photosButton.alpha = 1
             self.filesButton.transform = CGAffineTransform.identity
             self.photosButton.transform = CGAffineTransform.identity
-        } completion: { _ in
-            // Add subtle bounce effect
-            UIView.animate(withDuration: 0.2, delay: 0, options: [.curveEaseInOut]) {
-                self.importButton.transform = CGAffineTransform(rotationAngle: .pi * 0.25).scaledBy(x: 1.1, y: 1.1)
-            } completion: { _ in
-                UIView.animate(withDuration: 0.1) {
-                    self.importButton.transform = CGAffineTransform(rotationAngle: .pi * 0.25)
-                }
-            }
         }
         
-        print("✨ ScannerViewController: Modern import options animated in")
+        print("✨ ScannerViewController: Import options shown")
     }
     
     private func hideImportOptions() {
-        print("📱 ScannerViewController: Hiding import options with reverse animation")
+        print("📱 ScannerViewController: Hiding import options")
         isImportMenuOpen = false
         
         let originalImage = UIImage(systemName: "plus") ?? UIImage(systemName: "add")
         
-        // Reverse spring animation
-        UIView.animate(withDuration: 0.4, delay: 0, usingSpringWithDamping: 0.8, initialSpringVelocity: 0.3, options: [.curveEaseIn]) {
-            // Transform back to original button
+        // Simple reverse animation
+        UIView.animate(withDuration: 0.3, options: [.curveEaseInOut]) {
+            // Transform back to original + button
             self.importButton.setImage(originalImage, for: .normal)
             self.importButton.transform = CGAffineTransform.identity
             
@@ -450,7 +441,7 @@ public final class ScannerViewController: UIViewController {
             self.photosButton.transform = CGAffineTransform(scaleX: 0.1, y: 0.1)
         }
         
-        print("✨ ScannerViewController: Modern import options animated out")
+        print("✨ ScannerViewController: Import options hidden")
     }
     
     @objc private func openFiles() {
