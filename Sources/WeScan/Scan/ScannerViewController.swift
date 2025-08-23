@@ -375,9 +375,8 @@ public final class ScannerViewController: UIViewController {
         print("📱 ScannerViewController: Showing import options")
         isImportMenuOpen = true
         
-        // Transform import button to X immediately
-        let xImage = UIImage(systemName: "xmark") ?? UIImage(systemName: "multiply")
-        importButton.setImage(xImage, for: .normal)
+        // Keep the same + icon, don't change it
+        // We'll just rotate it to make it look like an X
         
         // Show buttons
         filesButton.isHidden = false
@@ -396,10 +395,10 @@ public final class ScannerViewController: UIViewController {
             photosButton.heightAnchor.constraint(equalToConstant: 44)
         ])
         
-        // Simple animation without rotation on the X
+        // Rotate the + icon by 45 degrees to make it look like X
         UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut]) {
-            // Don't rotate the X - keep it as is to show clear X
-            // self.importButton.transform = CGAffineTransform.identity
+            // Rotate the + button to make it look like X
+            self.importButton.transform = CGAffineTransform(rotationAngle: .pi / 4)
             
             // Animate buttons in with scale and alpha
             self.filesButton.alpha = 1
@@ -415,12 +414,11 @@ public final class ScannerViewController: UIViewController {
         print("📱 ScannerViewController: Hiding import options")
         isImportMenuOpen = false
         
-        let originalImage = UIImage(systemName: "plus") ?? UIImage(systemName: "add")
+        // Don't change the icon, just rotate back to original position
         
         // Simple reverse animation
         UIView.animate(withDuration: 0.3, delay: 0, options: [.curveEaseInOut]) {
-            // Transform back to original + button
-            self.importButton.setImage(originalImage, for: .normal)
+            // Rotate back to original + position (0 degrees)
             self.importButton.transform = CGAffineTransform.identity
             
             // Scale down and fade out buttons
