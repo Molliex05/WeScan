@@ -136,6 +136,7 @@ final class EditScanViewController: UIViewController {
         // Disable interactive swipe-back to avoid accidental pop when dragging the left corner
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         navigationController?.navigationBar.isTranslucent = false
+        navigationController?.navigationBar.prefersLargeTitles = false
         if #available(iOS 13.0, *) {
             let appearance = UINavigationBarAppearance()
             appearance.configureWithOpaqueBackground()
@@ -197,12 +198,22 @@ final class EditScanViewController: UIViewController {
     }
 
     private func setupConstraints() {
-        let imageViewConstraints = [
-            imageView.topAnchor.constraint(equalTo: view.topAnchor),
-            imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            imageView.bottomAnchor.constraint(equalTo: confirmButton.topAnchor, constant: -12),
-            imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
-        ]
+        var imageViewConstraints: [NSLayoutConstraint] = []
+        if #available(iOS 11.0, *) {
+            imageViewConstraints = [
+                imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+                imageView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor),
+                imageView.bottomAnchor.constraint(equalTo: confirmButton.topAnchor, constant: -12),
+                imageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
+            ]
+        } else {
+            imageViewConstraints = [
+                imageView.topAnchor.constraint(equalTo: view.topAnchor),
+                imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                imageView.bottomAnchor.constraint(equalTo: confirmButton.topAnchor, constant: -12),
+                imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
+            ]
+        }
 
         quadViewWidthConstraint = quadView.widthAnchor.constraint(equalToConstant: 0.0)
         quadViewHeightConstraint = quadView.heightAnchor.constraint(equalToConstant: 0.0)
@@ -301,6 +312,7 @@ final class EditScanViewController: UIViewController {
     private func adjustQuadViewConstraints() {
         // Leave safe space above the confirm button to avoid overlap for tall documents
         let availableBounds = imageView.bounds.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: 8, right: 0))
+        // Ensure the full image fits within the imageView bounds (below the navigation bar)
         let frame = AVMakeRect(aspectRatio: image.size, insideRect: availableBounds)
         quadViewWidthConstraint.constant = frame.size.width
         quadViewHeightConstraint.constant = frame.size.height
