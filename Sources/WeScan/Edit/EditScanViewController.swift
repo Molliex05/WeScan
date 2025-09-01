@@ -145,6 +145,7 @@ final class EditScanViewController: UIViewController {
             navigationController?.navigationBar.barTintColor = .black
             navigationController?.navigationBar.shadowImage = UIImage()
         }
+        navigationController?.view.backgroundColor = .black
     }
 
     override public func viewDidAppear(_ animated: Bool) {

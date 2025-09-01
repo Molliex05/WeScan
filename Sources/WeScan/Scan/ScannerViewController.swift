@@ -674,8 +674,8 @@ extension ScannerViewController: RectangleDetectionDelegateProtocol {
     func captureSessionManager(_ captureSessionManager: CaptureSessionManager, didCapturePicture picture: UIImage, withQuad quad: Quadrilateral?) {
         activityIndicator.stopAnimating()
 
-        // Ensure back button title is localized (uses host provider key "back_button")
-        let backTitle = WeScanLocalization.localizedString(for: .backButton, fallback: "Retour")
+        // Ensure back button title is localized (host can map `.back` to "back_button")
+        let backTitle = WeScanLocalization.localizedString(for: .back, fallback: "Back")
         if #available(iOS 14.0, *) {
             navigationItem.backButtonTitle = backTitle
         } else {

@@ -20,7 +20,6 @@ public protocol WeScanLocalizationProviding: AnyObject {
         case save
         case next
             case back
-            case backButton
         case edit
         case scan
         case crop
