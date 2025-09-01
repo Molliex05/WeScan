@@ -67,6 +67,7 @@ final class EditScanViewController: UIViewController {
         button.setTitle(confirmTitle, for: .normal)
         
         // Glutax V2 theme colors
+        // Use dynamic AccentColor; final variant is updated against system style (not forced dark)
         button.backgroundColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
         button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 12
@@ -82,6 +83,10 @@ final class EditScanViewController: UIViewController {
         // S'assurer que le bouton reçoit les touches
         button.isUserInteractionEnabled = true
         button.layer.zPosition = 1000
+        if #available(iOS 13.0, *) {
+            // Don't inherit forced dark from parent; keep it aligned to system style
+            button.overrideUserInterfaceStyle = .unspecified
+        }
         return button
     }()
 
@@ -157,6 +162,28 @@ final class EditScanViewController: UIViewController {
         super.viewDidLayoutSubviews()
         adjustQuadViewConstraints()
         displayQuad()
+    }
+
+    override public func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateConfirmButtonAccentForSystemStyle()
+    }
+
+    override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        updateConfirmButtonAccentForSystemStyle()
+    }
+
+    private func updateConfirmButtonAccentForSystemStyle() {
+        guard #available(iOS 13.0, *) else { return }
+        // Try to resolve against the windowScene (system) style, not the VC's forced dark
+        let systemStyle = view.window?.windowScene?.traitCollection.userInterfaceStyle ?? .unspecified
+        let trait = UITraitCollection(userInterfaceStyle: systemStyle)
+        if let accent = UIColor(named: "AccentColor", in: Bundle(for: EditScanViewController.self), compatibleWith: trait) {
+            confirmButton.backgroundColor = accent
+        }
+        // Make the button explicitly use that style
+        confirmButton.overrideUserInterfaceStyle = systemStyle
     }
 
     override public func viewWillDisappear(_ animated: Bool) {
