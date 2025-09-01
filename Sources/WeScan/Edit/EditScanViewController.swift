@@ -130,6 +130,21 @@ final class EditScanViewController: UIViewController {
         super.viewWillAppear(animated)
         // Disable interactive swipe-back to avoid accidental pop when dragging the left corner
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        navigationController?.navigationBar.isTranslucent = false
+        if #available(iOS 13.0, *) {
+            let appearance = UINavigationBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .black
+            appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+            appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            appearance.shadowColor = .clear
+            navigationController?.navigationBar.standardAppearance = appearance
+            navigationController?.navigationBar.compactAppearance = appearance
+            navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        } else {
+            navigationController?.navigationBar.barTintColor = .black
+            navigationController?.navigationBar.shadowImage = UIImage()
+        }
     }
 
     override public func viewDidAppear(_ animated: Bool) {
@@ -197,24 +212,7 @@ final class EditScanViewController: UIViewController {
         }
     }
 
-    override public func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        navigationController?.navigationBar.isTranslucent = false
-        if #available(iOS 13.0, *) {
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = .black
-            appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
-            appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
-            appearance.shadowColor = .clear
-            navigationController?.navigationBar.standardAppearance = appearance
-            navigationController?.navigationBar.compactAppearance = appearance
-            navigationController?.navigationBar.scrollEdgeAppearance = appearance
-        } else {
-            navigationController?.navigationBar.barTintColor = .black
-            navigationController?.navigationBar.shadowImage = UIImage()
-        }
-    }
+    
 
     @objc func pushReviewController() {
         guard let quad = quadView.quad,
