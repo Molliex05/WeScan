@@ -100,7 +100,7 @@ public final class ScannerViewController: UIViewController {
         let button = UIButton(type: .system)
         let image = UIImage(systemName: "folder.fill") ?? UIImage(systemName: "doc")
         button.setImage(image, for: .normal)
-        button.tintColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
+        button.tintColor = .white
         if #available(iOS 13.0, *) {
             button.backgroundColor = UIColor(
                 named: "CardBackgroundColor",
@@ -128,7 +128,7 @@ public final class ScannerViewController: UIViewController {
         let button = UIButton(type: .system)
         let image = UIImage(systemName: "photo.fill") ?? UIImage(systemName: "photo")
         button.setImage(image, for: .normal)
-        button.tintColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
+        button.tintColor = .white
         if #available(iOS 13.0, *) {
             button.backgroundColor = UIColor(
                 named: "CardBackgroundColor",

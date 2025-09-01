@@ -15,7 +15,7 @@
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" red="0" green="0" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                 </viewController>
@@ -54,7 +54,7 @@
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="backgroundColor" red="0" green="0" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="YcL-Ck-Kaf" firstAttribute="centerY" secondItem="Hke-o0-5wQ" secondAttribute="centerY" id="HcC-KV-S7s"/>
                             <constraint firstItem="YcL-Ck-Kaf" firstAttribute="top" secondItem="YbL-Hk-8Tq" secondAttribute="bottom" constant="8" id="Qvc-Sb-cII"/>
@@ -100,7 +100,7 @@
                                 </connections>
                             </button>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="backgroundColor" red="0" green="0" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="0Oa-12-mc5" firstAttribute="top" secondItem="95t-Li-oZf" secondAttribute="bottom" constant="8" id="ICZ-Ug-Gsb"/>
                             <constraint firstItem="0Oa-12-mc5" firstAttribute="centerY" secondItem="7M6-vz-otb" secondAttribute="centerY" id="KQK-fV-Jws"/>
@@ -168,7 +168,7 @@
                 <view contentMode="scaleToFill" id="Wzl-dG-SyX">
                     <rect key="frame" x="0.0" y="0.0" width="240" height="128"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                    <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                    <color key="backgroundColor" red="0" green="0" blue="0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <viewLayoutGuide key="safeArea" id="Rvg-d4-sIG"/>
                 </view>
             </objects>

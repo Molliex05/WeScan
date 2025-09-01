@@ -138,6 +138,16 @@ public final class ImageScannerController: UINavigationController {
         }
     }
 
+    public override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        view.window?.backgroundColor = .black
+    }
+
+    public override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        view.window?.backgroundColor = .black
+    }
+
     // Ensure any pushed/presented view controller inherits the forced dark style
     public override func pushViewController(_ viewController: UIViewController, animated: Bool) {
         if #available(iOS 13.0, *) {
