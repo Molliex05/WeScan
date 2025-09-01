@@ -86,6 +86,7 @@ final class ReviewViewController: UIViewController {
         )
         navigationItem.rightBarButtonItem = doneButton
         navigationController?.navigationBar.barStyle = .black
+        navigationController?.navigationBar.tintColor = .white
     }
 
     override func viewWillAppear(_ animated: Bool) {

@@ -42,6 +42,7 @@ public final class ScannerViewController: UIViewController {
         let cancelTitle = WeScanLocalization.localizedString(for: .scanningCancel, fallback: "Cancel")
         print("🔧 ScannerViewController: Setting cancel button title to: '\(cancelTitle)'")
         button.setTitle(cancelTitle, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         button.addTarget(self, action: #selector(cancelImageScannerController), for: .touchUpInside)
         return button
@@ -99,9 +100,7 @@ public final class ScannerViewController: UIViewController {
         let button = UIButton(type: .system)
         let image = UIImage(systemName: "folder.fill") ?? UIImage(systemName: "doc")
         button.setImage(image, for: .normal)
-        button.tintColor = UIColor { traitCollection in
-            return traitCollection.userInterfaceStyle == .dark ? .white : (UIColor(named: "AccentColor") ?? UIColor.systemOrange)
-        }
+        button.tintColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
         button.backgroundColor = .black
         button.layer.cornerRadius = 22
         button.layer.shadowColor = UIColor.black.cgColor
@@ -121,9 +120,7 @@ public final class ScannerViewController: UIViewController {
         let button = UIButton(type: .system)
         let image = UIImage(systemName: "photo.fill") ?? UIImage(systemName: "photo")
         button.setImage(image, for: .normal)
-        button.tintColor = UIColor { traitCollection in
-            return traitCollection.userInterfaceStyle == .dark ? .white : (UIColor(named: "AccentColor") ?? UIColor.systemOrange)
-        }
+        button.tintColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
         button.backgroundColor = .black
         button.layer.cornerRadius = 22
         button.layer.shadowColor = UIColor.black.cgColor
@@ -210,6 +207,8 @@ public final class ScannerViewController: UIViewController {
 
     private func setupViews() {
         view.backgroundColor = .black
+        view.isOpaque = true
+        videoPreviewLayer.backgroundColor = UIColor.black.cgColor
         view.layer.addSublayer(videoPreviewLayer)
         quadView.translatesAutoresizingMaskIntoConstraints = false
         quadView.editable = false

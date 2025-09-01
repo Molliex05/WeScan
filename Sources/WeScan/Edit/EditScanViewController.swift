@@ -17,7 +17,7 @@ final class EditScanViewController: UIViewController {
         imageView.clipsToBounds = true
         imageView.isOpaque = true
         imageView.image = image
-        imageView.backgroundColor = .clear
+        imageView.backgroundColor = .black
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
         return imageView
@@ -105,6 +105,7 @@ final class EditScanViewController: UIViewController {
         }
         view.backgroundColor = .black
         navigationController?.navigationBar.barStyle = .black
+        navigationController?.navigationBar.tintColor = .white
         setupViews()
         setupConstraints()
         let editTitle = WeScanLocalization.localizedString(for: .editScanTitle, fallback: "Edit Scan")
