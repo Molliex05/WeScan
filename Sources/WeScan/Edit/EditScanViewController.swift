@@ -99,8 +99,12 @@ final class EditScanViewController: UIViewController {
 
     override public func viewDidLoad() {
         super.viewDidLoad()
-        
-        view.backgroundColor = .clear
+
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .dark
+        }
+        view.backgroundColor = .black
+        navigationController?.navigationBar.barStyle = .black
         setupViews()
         setupConstraints()
         let editTitle = WeScanLocalization.localizedString(for: .editScanTitle, fallback: "Edit Scan")

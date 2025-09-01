@@ -74,6 +74,12 @@ public final class ImageScannerController: UINavigationController {
 
         self.imageScannerDelegate = delegate
 
+        // Always force dark appearance for the entire scanning flow
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .dark
+        }
+        view.backgroundColor = .black
+
         // Configure for full screen experience
         if #available(iOS 13.0, *) {
             navigationBar.tintColor = .label
@@ -82,6 +88,8 @@ public final class ImageScannerController: UINavigationController {
         }
         navigationBar.isTranslucent = true
         navigationBar.isHidden = true  // Hide navigation bar completely
+        navigationBar.barStyle = .black
+        toolbar?.barStyle = .black
         
         // Ensure full screen presentation
         modalPresentationStyle = .fullScreen
@@ -105,6 +113,23 @@ public final class ImageScannerController: UINavigationController {
 
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    // Ensure any pushed/presented view controller inherits the forced dark style
+    public override func pushViewController(_ viewController: UIViewController, animated: Bool) {
+        if #available(iOS 13.0, *) {
+            viewController.overrideUserInterfaceStyle = .dark
+        }
+        viewController.view.backgroundColor = .black
+        super.pushViewController(viewController, animated: animated)
+    }
+
+    public override func setViewControllers(_ viewControllers: [UIViewController], animated: Bool) {
+        if #available(iOS 13.0, *) {
+            viewControllers.forEach { $0.overrideUserInterfaceStyle = .dark }
+        }
+        viewControllers.forEach { $0.view.backgroundColor = .black }
+        super.setViewControllers(viewControllers, animated: animated)
     }
 
     private func detect(image: UIImage, completion: @escaping (Quadrilateral?) -> Void) {

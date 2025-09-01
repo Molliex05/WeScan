@@ -65,6 +65,10 @@ public final class EditImageViewController: UIViewController {
 
     override public func viewDidLoad() {
         super.viewDidLoad()
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .dark
+        }
+        view.backgroundColor = .black
 
         setupViews()
         setupConstraints()

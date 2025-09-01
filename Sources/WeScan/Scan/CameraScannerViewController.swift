@@ -45,6 +45,9 @@ public final class CameraScannerViewController: UIViewController {
 
     override public func viewDidLoad() {
         super.viewDidLoad()
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .dark
+        }
         setupView()
     }
 
@@ -73,7 +76,7 @@ public final class CameraScannerViewController: UIViewController {
     }
 
     private func setupView() {
-        view.backgroundColor = .darkGray
+        view.backgroundColor = .black
         view.layer.addSublayer(videoPreviewLayer)
         quadView.translatesAutoresizingMaskIntoConstraints = false
         quadView.editable = false

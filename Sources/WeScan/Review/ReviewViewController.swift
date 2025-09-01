@@ -67,6 +67,10 @@ final class ReviewViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .dark
+        }
+        view.backgroundColor = .black
 
         enhancedImageIsAvailable = results.enhancedScan != nil
 
@@ -81,6 +85,7 @@ final class ReviewViewController: UIViewController {
                                   comment: "The review title of the ReviewController"
         )
         navigationItem.rightBarButtonItem = doneButton
+        navigationController?.navigationBar.barStyle = .black
     }
 
     override func viewWillAppear(_ animated: Bool) {

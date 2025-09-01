@@ -102,7 +102,7 @@ public final class ScannerViewController: UIViewController {
         button.tintColor = UIColor { traitCollection in
             return traitCollection.userInterfaceStyle == .dark ? .white : (UIColor(named: "AccentColor") ?? UIColor.systemOrange)
         }
-        button.backgroundColor = UIColor(named: "CardBackgroundColor") ?? UIColor.systemBackground
+        button.backgroundColor = .black
         button.layer.cornerRadius = 22
         button.layer.shadowColor = UIColor.black.cgColor
         button.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -124,7 +124,7 @@ public final class ScannerViewController: UIViewController {
         button.tintColor = UIColor { traitCollection in
             return traitCollection.userInterfaceStyle == .dark ? .white : (UIColor(named: "AccentColor") ?? UIColor.systemOrange)
         }
-        button.backgroundColor = UIColor(named: "CardBackgroundColor") ?? UIColor.systemBackground
+        button.backgroundColor = .black
         button.layer.cornerRadius = 22
         button.layer.shadowColor = UIColor.black.cgColor
         button.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -147,6 +147,9 @@ public final class ScannerViewController: UIViewController {
     override public func viewDidLoad() {
         super.viewDidLoad()
 
+        if #available(iOS 13.0, *) {
+            overrideUserInterfaceStyle = .dark
+        }
         title = nil
         view.backgroundColor = UIColor.black
 
