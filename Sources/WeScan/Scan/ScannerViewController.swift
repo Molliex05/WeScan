@@ -101,7 +101,15 @@ public final class ScannerViewController: UIViewController {
         let image = UIImage(systemName: "folder.fill") ?? UIImage(systemName: "doc")
         button.setImage(image, for: .normal)
         button.tintColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
-        button.backgroundColor = .black
+        if #available(iOS 13.0, *) {
+            button.backgroundColor = UIColor(
+                named: "CardBackgroundColor",
+                in: Bundle(for: ScannerViewController.self),
+                compatibleWith: UITraitCollection(userInterfaceStyle: .dark)
+            ) ?? .black
+        } else {
+            button.backgroundColor = UIColor(named: "CardBackgroundColor") ?? .black
+        }
         button.layer.cornerRadius = 22
         button.layer.shadowColor = UIColor.black.cgColor
         button.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -121,7 +129,15 @@ public final class ScannerViewController: UIViewController {
         let image = UIImage(systemName: "photo.fill") ?? UIImage(systemName: "photo")
         button.setImage(image, for: .normal)
         button.tintColor = UIColor(named: "AccentColor") ?? UIColor.systemOrange
-        button.backgroundColor = .black
+        if #available(iOS 13.0, *) {
+            button.backgroundColor = UIColor(
+                named: "CardBackgroundColor",
+                in: Bundle(for: ScannerViewController.self),
+                compatibleWith: UITraitCollection(userInterfaceStyle: .dark)
+            ) ?? .black
+        } else {
+            button.backgroundColor = UIColor(named: "CardBackgroundColor") ?? .black
+        }
         button.layer.cornerRadius = 22
         button.layer.shadowColor = UIColor.black.cgColor
         button.layer.shadowOffset = CGSize(width: 0, height: 2)
@@ -195,7 +211,20 @@ public final class ScannerViewController: UIViewController {
         // Show navigation bar when leaving
         navigationController?.setNavigationBarHidden(false, animated: animated)
         navigationController?.navigationBar.isTranslucent = false
-        navigationController?.navigationBar.barStyle = originalBarStyle ?? .default
+        navigationController?.navigationBar.barStyle = .black
+        navigationController?.navigationBar.tintColor = .white
+        if #available(iOS 13.0, *) {
+            let navAppearance = UINavigationBarAppearance()
+            navAppearance.configureWithOpaqueBackground()
+            navAppearance.backgroundColor = .black
+            navAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+            navAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            navigationController?.navigationBar.standardAppearance = navAppearance
+            navigationController?.navigationBar.compactAppearance = navAppearance
+            navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
+        } else {
+            navigationController?.navigationBar.barTintColor = .black
+        }
         captureSessionManager?.stop()
         guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
         if device.torchMode == .on {

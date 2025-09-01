@@ -82,10 +82,10 @@ public final class ImageScannerController: UINavigationController {
 
         // Configure for full screen experience
         navigationBar.tintColor = .white
-        navigationBar.isTranslucent = true
+        navigationBar.isTranslucent = false
         navigationBar.isHidden = true  // Hide navigation bar completely
         navigationBar.barStyle = .black
-        toolbar?.barStyle = .black
+        configureBarsForDark()
         
         // Ensure full screen presentation
         modalPresentationStyle = .fullScreen
@@ -109,6 +109,33 @@ public final class ImageScannerController: UINavigationController {
 
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    private func configureBarsForDark() {
+        navigationBar.tintColor = .white
+        if #available(iOS 13.0, *) {
+            let navAppearance = UINavigationBarAppearance()
+            navAppearance.configureWithOpaqueBackground()
+            navAppearance.backgroundColor = .black
+            navAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
+            navAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            navigationBar.standardAppearance = navAppearance
+            navigationBar.compactAppearance = navAppearance
+            navigationBar.scrollEdgeAppearance = navAppearance
+
+            let tbAppearance = UIToolbarAppearance()
+            tbAppearance.configureWithOpaqueBackground()
+            tbAppearance.backgroundColor = .black
+            toolbar?.standardAppearance = tbAppearance
+            if #available(iOS 15.0, *) {
+                toolbar?.scrollEdgeAppearance = tbAppearance
+            }
+        } else {
+            navigationBar.barTintColor = .black
+            navigationBar.isTranslucent = false
+            toolbar?.barTintColor = .black
+            toolbar?.isTranslucent = false
+        }
     }
 
     // Ensure any pushed/presented view controller inherits the forced dark style

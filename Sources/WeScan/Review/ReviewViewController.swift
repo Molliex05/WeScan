@@ -111,8 +111,19 @@ final class ReviewViewController: UIViewController {
 
     private func setupToolbar() {
         guard enhancedImageIsAvailable else { return }
-
-        navigationController?.toolbar.barStyle = .blackTranslucent
+        navigationController?.toolbar.barStyle = .black
+        navigationController?.toolbar.isTranslucent = false
+        if #available(iOS 13.0, *) {
+            let appearance = UIToolbarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .black
+            navigationController?.toolbar.standardAppearance = appearance
+            if #available(iOS 15.0, *) {
+                navigationController?.toolbar.scrollEdgeAppearance = appearance
+            }
+        } else {
+            navigationController?.toolbar.barTintColor = .black
+        }
 
         let fixedSpace = UIBarButtonItem(barButtonSystemItem: .fixedSpace, target: nil, action: nil)
         let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
