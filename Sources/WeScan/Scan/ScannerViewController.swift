@@ -219,11 +219,13 @@ public final class ScannerViewController: UIViewController {
             navAppearance.backgroundColor = .black
             navAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
             navAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            navAppearance.shadowColor = .clear
             navigationController?.navigationBar.standardAppearance = navAppearance
             navigationController?.navigationBar.compactAppearance = navAppearance
             navigationController?.navigationBar.scrollEdgeAppearance = navAppearance
         } else {
             navigationController?.navigationBar.barTintColor = .black
+            navigationController?.navigationBar.shadowImage = UIImage()
         }
         captureSessionManager?.stop()
         guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
@@ -671,6 +673,14 @@ extension ScannerViewController: RectangleDetectionDelegateProtocol {
 
     func captureSessionManager(_ captureSessionManager: CaptureSessionManager, didCapturePicture picture: UIImage, withQuad quad: Quadrilateral?) {
         activityIndicator.stopAnimating()
+
+        // Ensure back button title is localized (uses host provider key "back_button")
+        let backTitle = WeScanLocalization.localizedString(for: .backButton, fallback: "Retour")
+        if #available(iOS 14.0, *) {
+            navigationItem.backButtonTitle = backTitle
+        } else {
+            navigationItem.backBarButtonItem = UIBarButtonItem(title: backTitle, style: .plain, target: nil, action: nil)
+        }
 
         let editVC = EditScanViewController(image: picture, quad: quad)
         navigationController?.pushViewController(editVC, animated: false)

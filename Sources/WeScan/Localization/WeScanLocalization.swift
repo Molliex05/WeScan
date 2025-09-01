@@ -12,14 +12,15 @@ public protocol WeScanLocalizationProviding: AnyObject {
     func localizedString(for key: WeScanLocalization.Key) -> String
 }
 
-public enum WeScanLocalization {
-    public enum Key {
+    public enum WeScanLocalization {
+        public enum Key {
         case confirm
         case cancel
         case retake
         case save
         case next
-        case back
+            case back
+            case backButton
         case edit
         case scan
         case crop

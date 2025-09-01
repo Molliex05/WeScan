@@ -119,6 +119,7 @@ public final class ImageScannerController: UINavigationController {
             navAppearance.backgroundColor = .black
             navAppearance.titleTextAttributes = [.foregroundColor: UIColor.white]
             navAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+            navAppearance.shadowColor = .clear
             navigationBar.standardAppearance = navAppearance
             navigationBar.compactAppearance = navAppearance
             navigationBar.scrollEdgeAppearance = navAppearance
@@ -133,6 +134,7 @@ public final class ImageScannerController: UINavigationController {
         } else {
             navigationBar.barTintColor = .black
             navigationBar.isTranslucent = false
+            navigationBar.shadowImage = UIImage()
             toolbar?.barTintColor = .black
             toolbar?.isTranslucent = false
         }
