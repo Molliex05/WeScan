@@ -143,11 +143,15 @@ public final class ImageScannerController: UINavigationController {
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         view.window?.backgroundColor = .black
+        blackFlashView.isHidden = true
+        print("🪄 ImageScannerController.viewWillAppear: ensured blackFlashView hidden=", blackFlashView.isHidden)
     }
 
     public override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         view.window?.backgroundColor = .black
+        blackFlashView.isHidden = true
+        print("🪄 ImageScannerController.viewDidAppear: ensured blackFlashView hidden=", blackFlashView.isHidden)
     }
 
     // Ensure any pushed/presented view controller inherits the forced dark style

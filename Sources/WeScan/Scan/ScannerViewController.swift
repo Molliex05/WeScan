@@ -206,6 +206,17 @@ public final class ScannerViewController: UIViewController {
 
         videoPreviewLayer.frame = view.layer.bounds
         print("🧭 ScannerViewController.viewDidLayoutSubviews: set preview frame=\(videoPreviewLayer.frame)")
+        // Debug: detect any full-screen opaque views that could cover the preview
+        let covering = view.subviews.filter { sub in
+            guard !sub.isHidden, sub.alpha > 0.01 else { return false }
+            let covers = sub.frame.insetBy(dx: -1, dy: -1).contains(view.bounds)
+            let bg = sub.backgroundColor
+            let opaqueBg = (bg != nil && bg != .clear)
+            return covers && opaqueBg
+        }
+        if covering.isEmpty == false {
+            print("⚠️ ScannerViewController: Potential covering views: \(covering.map { String(describing: type(of: $0)) + " bg=\($0.backgroundColor?.description ?? "nil")" })")
+        }
     }
 
     override public func viewWillDisappear(_ animated: Bool) {
@@ -244,6 +255,7 @@ public final class ScannerViewController: UIViewController {
         view.backgroundColor = .black
         view.isOpaque = true
         videoPreviewLayer.backgroundColor = UIColor.black.cgColor
+        videoPreviewLayer.isHidden = false
         view.layer.addSublayer(videoPreviewLayer)
         quadView.translatesAutoresizingMaskIntoConstraints = false
         quadView.editable = false
