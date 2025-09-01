@@ -55,6 +55,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     weak var delegate: RectangleDetectionDelegateProtocol?
     private var displayedRectangleResult: RectangleDetectorResult?
     private var photoOutput = AVCapturePhotoOutput()
+    private var hasLoggedFirstFrame = false
 
     /// Whether the CaptureSessionManager should be detecting quadrilaterals.
     private var isDetecting = true
@@ -76,9 +77,11 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
         super.init()
 
+        print("🎥 CaptureSessionManager: Initializing with preview layer: \(videoPreviewLayer)")
         guard let device = AVCaptureDevice.default(for: AVMediaType.video) else {
             let error = ImageScannerControllerError.inputDevice
             delegate?.captureSessionManager(self, didFailWithError: error)
+            print("❌ CaptureSessionManager: No video device available")
             return nil
         }
 
@@ -100,6 +103,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
             captureSession.canAddOutput(videoOutput) else {
                 let error = ImageScannerControllerError.inputDevice
                 delegate?.captureSessionManager(self, didFailWithError: error)
+                print("❌ CaptureSessionManager: Cannot add input/output to session")
                 return
         }
 
@@ -108,6 +112,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         } catch {
             let error = ImageScannerControllerError.inputDevice
             delegate?.captureSessionManager(self, didFailWithError: error)
+            print("❌ CaptureSessionManager: lockForConfiguration failed: \(error)")
             return
         }
 
@@ -129,6 +134,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
         videoPreviewLayer.session = captureSession
         videoPreviewLayer.videoGravity = .resizeAspectFill
+        print("🎛️ CaptureSessionManager: Session configured. preset=\(captureSession.sessionPreset.rawValue), livePhoto=\(photoOutput.isLivePhotoCaptureEnabled), gravity=\(videoPreviewLayer.videoGravity)")
 
         videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "video_ouput_queue"))
     }
@@ -141,11 +147,19 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
         switch authorizationStatus {
         case .authorized:
+            print("▶️ CaptureSessionManager: Starting session… authorized")
             DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-                self?.captureSession.startRunning()
+                guard let self else { return }
+                self.captureSession.startRunning()
+                let running = self.captureSession.isRunning
                 DispatchQueue.main.async {
-                    guard let self = self else { return }
                     self.isDetecting = true
+                    print("✅ CaptureSessionManager: Session started. isRunning=\(running)")
+                    if let conn = self.videoPreviewLayer.connection {
+                        print("🔗 Preview connection: isEnabled=\(conn.isEnabled) isActive=\(conn.isActive) vidOrientation=\(conn.videoOrientation.rawValue)")
+                    } else {
+                        print("⚠️ CaptureSessionManager: No preview connection")
+                    }
                 }
             }
         case .notDetermined:
@@ -157,6 +171,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
                     } else {
                         let error = ImageScannerControllerError.authorization
                         self.delegate?.captureSessionManager(self, didFailWithError: error)
+                        print("❌ CaptureSessionManager: Camera access denied")
                     }
                 }
             })
@@ -165,17 +180,20 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
                 guard let self = self else { return }
                 let error = ImageScannerControllerError.authorization
                 self.delegate?.captureSessionManager(self, didFailWithError: error)
+                print("❌ CaptureSessionManager: Authorization status not allowed: \(authorizationStatus.rawValue)")
             }
         }
     }
 
     internal func stop() {
-          DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-              guard let self = self else { return }
-              if self.captureSession.isRunning {
-                  self.captureSession.stopRunning()
-              }
+      print("⏹️ CaptureSessionManager: Stopping session…")
+      DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+          guard let self = self else { return }
+          if self.captureSession.isRunning {
+              self.captureSession.stopRunning()
+              print("✅ CaptureSessionManager: Session stopped")
           }
+      }
       }
 
     internal func capturePhoto() {
@@ -200,6 +218,11 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         }
 
         let imageSize = CGSize(width: CVPixelBufferGetWidth(pixelBuffer), height: CVPixelBufferGetHeight(pixelBuffer))
+
+        if hasLoggedFirstFrame == false {
+            hasLoggedFirstFrame = true
+            print("📸 CaptureSessionManager: First frame received. imageSize=\(imageSize)")
+        }
 
         if #available(iOS 11.0, *) {
             VisionRectangleDetector.rectangle(forPixelBuffer: pixelBuffer) { rectangle in

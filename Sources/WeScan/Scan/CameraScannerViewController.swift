@@ -49,6 +49,7 @@ public final class CameraScannerViewController: UIViewController {
             overrideUserInterfaceStyle = .dark
         }
         setupView()
+        print("🧭 CameraScannerViewController.viewDidLoad: bounds=\(view.bounds), safeInsets=\(view.safeAreaInsets)")
     }
 
     override public func viewWillAppear(_ animated: Bool) {
@@ -63,6 +64,7 @@ public final class CameraScannerViewController: UIViewController {
         super.viewDidLayoutSubviews()
 
         videoPreviewLayer.frame = view.layer.bounds
+        print("🧭 CameraScannerViewController.viewDidLayoutSubviews: set preview frame=\(videoPreviewLayer.frame)")
     }
 
     override public func viewWillDisappear(_ animated: Bool) {

@@ -166,11 +166,13 @@ public final class ScannerViewController: UIViewController {
         title = nil
         view.backgroundColor = UIColor.black
 
+        print("🧭 ScannerViewController.viewDidLoad: bounds=\(view.bounds), safeInsets=\(view.safeAreaInsets)")
         setupViews()
         setupNavigationBar()
         setupConstraints()
 
         captureSessionManager = CaptureSessionManager(videoPreviewLayer: videoPreviewLayer, delegate: self)
+        print("🧭 ScannerViewController: captureSessionManager created? \(captureSessionManager != nil)")
 
         originalBarStyle = navigationController?.navigationBar.barStyle
 
@@ -196,12 +198,14 @@ public final class ScannerViewController: UIViewController {
 
         // Hide navigation bar for full screen experience
         navigationController?.setNavigationBarHidden(true, animated: animated)
+        print("🧭 ScannerViewController.viewWillAppear: bounds=\(view.bounds), safeInsets=\(view.safeAreaInsets)")
     }
 
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
         videoPreviewLayer.frame = view.layer.bounds
+        print("🧭 ScannerViewController.viewDidLayoutSubviews: set preview frame=\(videoPreviewLayer.frame)")
     }
 
     override public func viewWillDisappear(_ animated: Bool) {
