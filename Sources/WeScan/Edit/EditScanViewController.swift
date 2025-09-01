@@ -151,22 +151,13 @@ final class EditScanViewController: UIViewController {
             navigationController?.navigationBar.shadowImage = UIImage()
         }
         navigationController?.view.backgroundColor = .black
-    }
-
-    override public func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        navigationController?.interactivePopGestureRecognizer?.isEnabled = false
+        updateConfirmButtonAccentForSystemStyle()
     }
 
     override public func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         adjustQuadViewConstraints()
         displayQuad()
-    }
-
-    override public func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        updateConfirmButtonAccentForSystemStyle()
     }
 
     override public func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
