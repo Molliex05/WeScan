@@ -143,8 +143,14 @@ final class EditScanViewController: UIViewController {
         let editTitle = WeScanLocalization.localizedString(for: .editScanTitle, fallback: "Edit Scan")
         print("🔧 EditScanViewController: Setting navigation title to: '\(editTitle)'")
         title = editTitle
-        
-        // Plus besoin de gérer les boutons de navigation puisque la navigation bar est masquée
+        navigationItem.rightBarButtonItem = nil
+        if let firstVC = self.navigationController?.viewControllers.first, firstVC == self {
+            navigationItem.leftBarButtonItem = cancelButton
+        } else {
+            let customBackBarButtonItem = UIBarButtonItem(customView: customBackButton)
+            navigationItem.leftBarButtonItem = customBackBarButtonItem
+            navigationItem.hidesBackButton = true
+        }
 
         zoomGestureController = ZoomGestureController(image: image, quadView: quadView)
 
@@ -159,8 +165,8 @@ final class EditScanViewController: UIViewController {
         // Disable interactive swipe-back to avoid accidental pop when dragging the left corner
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         
-        // Masquer complètement la navigation bar native pour supprimer l'effet liquid glass d'iOS 26
-        navigationController?.setNavigationBarHidden(true, animated: false)
+        // Équivalent de .navigationBarHidden(true) en SwiftUI pour masquer l'effet liquid glass
+        navigationController?.navigationBar.isHidden = true
         
         navigationController?.navigationBar.isTranslucent = false
         navigationController?.navigationBar.prefersLargeTitles = false
@@ -209,7 +215,7 @@ final class EditScanViewController: UIViewController {
         super.viewWillDisappear(animated)
 
         // Remettre la navigation bar visible pour les autres écrans
-        navigationController?.setNavigationBarHidden(false, animated: true)
+        navigationController?.navigationBar.isHidden = false
 
         // Work around for an iOS 11.2 bug where UIBarButtonItems don't get back to their normal state after being pressed.
         navigationController?.navigationBar.tintAdjustmentMode = .normal
@@ -225,11 +231,6 @@ final class EditScanViewController: UIViewController {
         view.addSubview(imageView)
         view.addSubview(quadView)
         view.addSubview(confirmButton)
-        
-        // Ajouter le bouton retour directement dans la vue puisque la navigation bar est masquée
-        if navigationController?.viewControllers.count ?? 0 > 1 {
-            view.addSubview(customBackButton)
-        }
     }
 
     private func setupConstraints() {
@@ -267,21 +268,7 @@ final class EditScanViewController: UIViewController {
             confirmButton.heightAnchor.constraint(equalToConstant: 56)
         ]
         
-        var allConstraints = quadViewConstraints + imageViewConstraints + confirmButtonConstraints
-        
-        // Ajouter les contraintes du bouton retour si présent
-        if navigationController?.viewControllers.count ?? 0 > 1 {
-            customBackButton.translatesAutoresizingMaskIntoConstraints = false
-            let backButtonConstraints = [
-                customBackButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-                customBackButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
-                customBackButton.widthAnchor.constraint(equalToConstant: 44),
-                customBackButton.heightAnchor.constraint(equalToConstant: 44)
-            ]
-            allConstraints += backButtonConstraints
-        }
-        
-        NSLayoutConstraint.activate(allConstraints)
+        NSLayoutConstraint.activate(quadViewConstraints + imageViewConstraints + confirmButtonConstraints)
     }
 
     // MARK: - Actions
