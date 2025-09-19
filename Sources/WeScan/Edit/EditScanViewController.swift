@@ -318,10 +318,8 @@ final class EditScanViewController: UIViewController {
     }
     
     @objc private func backButtonTapped() {
-        // Action de retour pour le bouton du bas - même logique que le bouton cancel
-        if let imageScannerController = navigationController as? ImageScannerController {
-            imageScannerController.imageScannerDelegate?.imageScannerControllerDidCancel(imageScannerController)
-        }
+        // Action de retour pour le bouton du bas - retourner à la vue de scan précédente
+        navigationController?.popViewController(animated: true)
     }
     
     @objc private func buttonTouchDown(_ sender: UIButton) {
