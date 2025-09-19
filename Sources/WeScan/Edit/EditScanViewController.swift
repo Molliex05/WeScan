@@ -440,7 +440,7 @@ final class EditScanViewController: UIViewController {
 // MARK: - UIGestureRecognizerDelegate
 extension EditScanViewController: UIGestureRecognizerDelegate {
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        // Ne pas traiter les touches sur le bouton Valider
-        return touch.view != confirmButton
+        // Ne pas traiter les touches sur les boutons Valider et Retour
+        return touch.view != confirmButton && touch.view != backButton
     }
 }
