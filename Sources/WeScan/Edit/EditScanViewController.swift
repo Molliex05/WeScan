@@ -48,6 +48,33 @@ final class EditScanViewController: UIViewController {
         button.tintColor = navigationController?.navigationBar.tintColor
         return button
     }()
+    
+    private lazy var customBackButton: UIButton = {
+        let button = UIButton(type: .system)
+        
+        // Configuration de l'icône chevron.left
+        let config = UIImage.SymbolConfiguration(pointSize: 18, weight: .semibold)
+        let image = UIImage(systemName: "chevron.left", withConfiguration: config)
+        button.setImage(image, for: .normal)
+        
+        // Couleurs (équivalent AppColors.textPrimary et AppColors.cardBackground)
+        button.tintColor = .white // textPrimary en mode sombre
+        button.backgroundColor = UIColor.systemGray6.withAlphaComponent(0.2) // cardBackground equivalent
+        
+        // Style circulaire 44x44
+        button.frame = CGRect(x: 0, y: 0, width: 44, height: 44)
+        button.layer.cornerRadius = 22
+        button.clipsToBounds = true
+        
+        // Action
+        button.addTarget(self, action: #selector(customBackButtonTapped), for: .touchUpInside)
+        
+        // Effet de scale (équivalent ScaleButtonStyle)
+        button.addTarget(self, action: #selector(buttonTouchDown), for: .touchDown)
+        button.addTarget(self, action: #selector(buttonTouchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel])
+        
+        return button
+    }()
 
     /// The image the quadrilateral was detected on.
     private let image: UIImage
@@ -120,7 +147,10 @@ final class EditScanViewController: UIViewController {
         if let firstVC = self.navigationController?.viewControllers.first, firstVC == self {
             navigationItem.leftBarButtonItem = cancelButton
         } else {
-            navigationItem.leftBarButtonItem = nil
+            // Utiliser le bouton retour personnalisé
+            let customBackBarButtonItem = UIBarButtonItem(customView: customBackButton)
+            navigationItem.leftBarButtonItem = customBackBarButtonItem
+            navigationItem.hidesBackButton = true // Cacher le bouton retour par défaut
         }
 
         zoomGestureController = ZoomGestureController(image: image, quadView: quadView)
@@ -240,6 +270,25 @@ final class EditScanViewController: UIViewController {
         if let imageScannerController = navigationController as? ImageScannerController {
             imageScannerController.imageScannerDelegate?.imageScannerControllerDidCancel(imageScannerController)
         }
+    }
+    
+    @objc private func customBackButtonTapped() {
+        // Action de retour - pop du view controller actuel
+        navigationController?.popViewController(animated: true)
+    }
+    
+    @objc private func buttonTouchDown(_ sender: UIButton) {
+        // Effet de scale au touch down (équivalent ScaleButtonStyle)
+        UIView.animate(withDuration: 0.1, delay: 0, options: [.allowUserInteraction, .curveEaseInOut], animations: {
+            sender.transform = CGAffineTransform(scaleX: 0.95, y: 0.95)
+        })
+    }
+    
+    @objc private func buttonTouchUp(_ sender: UIButton) {
+        // Retour à la taille normale au touch up
+        UIView.animate(withDuration: 0.1, delay: 0, options: [.allowUserInteraction, .curveEaseInOut], animations: {
+            sender.transform = CGAffineTransform.identity
+        })
     }
 
     
