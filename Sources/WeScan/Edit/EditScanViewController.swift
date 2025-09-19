@@ -116,6 +116,33 @@ final class EditScanViewController: UIViewController {
         }
         return button
     }()
+    
+    private lazy var backButton: UIButton = {
+        let button = UIButton(type: .system)
+        let backTitle = WeScanLocalization.localizedString(for: .back, fallback: "Retour")
+        print("🔧 EditScanViewController: Setting back button title to: '\(backTitle)'")
+        button.setTitle(backTitle, for: .normal)
+        
+        // Style similaire au bouton confirmer mais secondaire
+        button.backgroundColor = UIColor.systemGray.withAlphaComponent(0.3)
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 12
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowRadius = 4
+        button.layer.shadowOpacity = 0.1
+        button.titleLabel?.font = .systemFont(ofSize: 18, weight: .semibold)
+        button.contentEdgeInsets = UIEdgeInsets(top: 14, left: 16, bottom: 14, right: 16)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+        
+        button.isUserInteractionEnabled = true
+        button.layer.zPosition = 1000
+        if #available(iOS 13.0, *) {
+            button.overrideUserInterfaceStyle = .unspecified
+        }
+        return button
+    }()
 
     // MARK: - Life Cycle
 
@@ -230,6 +257,7 @@ final class EditScanViewController: UIViewController {
     private func setupViews() {
         view.addSubview(imageView)
         view.addSubview(quadView)
+        view.addSubview(backButton)
         view.addSubview(confirmButton)
     }
 
@@ -261,14 +289,23 @@ final class EditScanViewController: UIViewController {
             quadViewHeightConstraint
         ]
 
+        // Contraintes pour le bouton retour (à gauche)
+        let backButtonConstraints = [
+            backButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            backButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
+            backButton.heightAnchor.constraint(equalToConstant: 56),
+            backButton.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor, multiplier: 0.35) // 35% de la largeur
+        ]
+        
+        // Contraintes pour le bouton confirmer (à droite, plus large)
         let confirmButtonConstraints = [
-            confirmButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
+            confirmButton.leadingAnchor.constraint(equalTo: backButton.trailingAnchor, constant: 12),
             confirmButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
             confirmButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             confirmButton.heightAnchor.constraint(equalToConstant: 56)
         ]
         
-        NSLayoutConstraint.activate(quadViewConstraints + imageViewConstraints + confirmButtonConstraints)
+        NSLayoutConstraint.activate(quadViewConstraints + imageViewConstraints + backButtonConstraints + confirmButtonConstraints)
     }
 
     // MARK: - Actions
@@ -280,6 +317,11 @@ final class EditScanViewController: UIViewController {
     
     @objc private func customBackButtonTapped() {
         // Action de retour - pop du view controller actuel
+        navigationController?.popViewController(animated: true)
+    }
+    
+    @objc private func backButtonTapped() {
+        // Action de retour pour le bouton du bas - même logique
         navigationController?.popViewController(animated: true)
     }
     
