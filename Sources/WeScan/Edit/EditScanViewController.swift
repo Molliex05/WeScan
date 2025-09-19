@@ -171,13 +171,8 @@ final class EditScanViewController: UIViewController {
         print("🔧 EditScanViewController: Setting navigation title to: '\(editTitle)'")
         title = editTitle
         navigationItem.rightBarButtonItem = nil
-        if let firstVC = self.navigationController?.viewControllers.first, firstVC == self {
-            navigationItem.leftBarButtonItem = cancelButton
-        } else {
-            let customBackBarButtonItem = UIBarButtonItem(customView: customBackButton)
-            navigationItem.leftBarButtonItem = customBackBarButtonItem
-            navigationItem.hidesBackButton = true
-        }
+        navigationItem.leftBarButtonItem = nil
+        navigationItem.hidesBackButton = true
 
         zoomGestureController = ZoomGestureController(image: image, quadView: quadView)
 
@@ -192,11 +187,11 @@ final class EditScanViewController: UIViewController {
         // Disable interactive swipe-back to avoid accidental pop when dragging the left corner
         navigationController?.interactivePopGestureRecognizer?.isEnabled = false
         
-        // Équivalent de .navigationBarHidden(true) en SwiftUI pour masquer l'effet liquid glass
-        navigationController?.navigationBar.isHidden = true
-        
+        // Configuration pour masquer l'effet liquid glass tout en gardant le titre visible
+        navigationController?.navigationBar.isHidden = false
         navigationController?.navigationBar.isTranslucent = false
         navigationController?.navigationBar.prefersLargeTitles = false
+        
         if #available(iOS 13.0, *) {
             let appearance = UINavigationBarAppearance()
             appearance.configureWithOpaqueBackground()
@@ -204,6 +199,10 @@ final class EditScanViewController: UIViewController {
             appearance.titleTextAttributes = [.foregroundColor: UIColor.white]
             appearance.largeTitleTextAttributes = [.foregroundColor: UIColor.white]
             appearance.shadowColor = .clear
+            
+            // Supprimer complètement l'effet de blur/liquid glass
+            appearance.backgroundEffect = nil
+            
             navigationController?.navigationBar.standardAppearance = appearance
             navigationController?.navigationBar.compactAppearance = appearance
             navigationController?.navigationBar.scrollEdgeAppearance = appearance
@@ -241,8 +240,7 @@ final class EditScanViewController: UIViewController {
     override public func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
 
-        // Remettre la navigation bar visible pour les autres écrans
-        navigationController?.navigationBar.isHidden = false
+        // Navigation bar reste visible pour les autres écrans
 
         // Work around for an iOS 11.2 bug where UIBarButtonItems don't get back to their normal state after being pressed.
         navigationController?.navigationBar.tintAdjustmentMode = .normal
@@ -289,15 +287,14 @@ final class EditScanViewController: UIViewController {
             quadViewHeightConstraint
         ]
 
-        // Contraintes pour le bouton retour (à gauche)
+        // Contraintes pour les boutons 50/50 de largeur
         let backButtonConstraints = [
             backButton.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
             backButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -8),
             backButton.heightAnchor.constraint(equalToConstant: 56),
-            backButton.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor, multiplier: 0.35) // 35% de la largeur
+            backButton.widthAnchor.constraint(equalTo: confirmButton.widthAnchor) // Même largeur
         ]
         
-        // Contraintes pour le bouton confirmer (à droite, plus large)
         let confirmButtonConstraints = [
             confirmButton.leadingAnchor.constraint(equalTo: backButton.trailingAnchor, constant: 12),
             confirmButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16),
@@ -321,8 +318,10 @@ final class EditScanViewController: UIViewController {
     }
     
     @objc private func backButtonTapped() {
-        // Action de retour pour le bouton du bas - même logique
-        navigationController?.popViewController(animated: true)
+        // Action de retour pour le bouton du bas - même logique que le bouton cancel
+        if let imageScannerController = navigationController as? ImageScannerController {
+            imageScannerController.imageScannerDelegate?.imageScannerControllerDidCancel(imageScannerController)
+        }
     }
     
     @objc private func buttonTouchDown(_ sender: UIButton) {
