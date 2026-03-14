@@ -255,6 +255,7 @@ public final class ScannerViewController: UIViewController {
         view.backgroundColor = .black
         view.isOpaque = true
         videoPreviewLayer.backgroundColor = UIColor.black.cgColor
+        videoPreviewLayer.videoGravity = .resizeAspectFill
         videoPreviewLayer.isHidden = false
         view.layer.addSublayer(videoPreviewLayer)
         quadView.translatesAutoresizingMaskIntoConstraints = false
