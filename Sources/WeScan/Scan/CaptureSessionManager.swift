@@ -80,6 +80,9 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     // swiftlint:disable:next line_length
     private let wescanBuildTag = "WeScan@17ba814 conf=0.3 shadow=0.85 noRectThresh=8 minAspect=0.1"
 
+    /// Seuil ISO au-delà duquel on considère que la scène est trop sombre (active le torch).
+    private let lowLightISOThreshold: Float = 800
+
     /// The number of times no rectangles have been found in a row.
     private var noRectangleCount = 0
 
@@ -244,6 +247,8 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
             print("📸 CaptureSessionManager: First frame received. imageSize=\(imageSize)")
         }
 
+        adjustTorchForLighting()
+
         let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
         let processedImage = preprocessFrameForDetection(ciImage)
 
@@ -256,6 +261,22 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
                 self.processRectangle(rectangle: rectangle, imageSize: imageSize)
             }
         }
+    }
+
+    /// Active le torch automatiquement si la scène est trop sombre (ISO élevé).
+    private func adjustTorchForLighting() {
+        guard let device = CaptureSession.current.device,
+              device.isTorchAvailable,
+              device.isExposureModeSupported(.continuousAutoExposure) else { return }
+
+        let isDark = device.iso > lowLightISOThreshold
+        let torchIsOn = device.torchMode == .on
+
+        guard isDark != torchIsOn else { return } // pas de changement nécessaire
+
+        try? device.lockForConfiguration()
+        device.torchMode = isDark ? .on : .off
+        device.unlockForConfiguration()
     }
 
     /// Corrige les images à contre-jour avant la détection de contours.
