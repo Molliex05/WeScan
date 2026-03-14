@@ -78,7 +78,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     }()
 
     // swiftlint:disable:next line_length
-    private let wescanBuildTag = "WeScan@17ba814 conf=0.3 shadow=0.85 noRectThresh=8 minAspect=0.1"
+    private let wescanBuildTag = "WeScan@4ccb689 maxAspect=0.65 minAspect=0.1 conf=0.3 noRectThresh=8"
 
     /// Seuil ISO au-delà duquel on considère que la scène est trop sombre (active le torch).
     private let lowLightISOThreshold: Float = 800
@@ -100,7 +100,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
         super.init()
 
-        print("🎥 \(wescanBuildTag)")
+        NSLog("🎥 %@", wescanBuildTag)
         guard let device = AVCaptureDevice.default(for: AVMediaType.video) else {
             let error = ImageScannerControllerError.inputDevice
             delegate?.captureSessionManager(self, didFailWithError: error)
