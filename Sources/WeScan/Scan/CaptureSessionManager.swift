@@ -82,6 +82,8 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
     /// Seuil ISO au-delà duquel on considère que la scène est trop sombre (active le torch).
     private let lowLightISOThreshold: Float = 800
+    /// True si l'utilisateur a éteint le flash manuellement — on ne le rallume plus.
+    private var userDisabledTorch = false
 
     /// The number of times no rectangles have been found in a row.
     private var noRectangleCount = 0
@@ -263,20 +265,23 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         }
     }
 
-    /// Active le torch automatiquement si la scène est trop sombre (ISO élevé).
+    /// Active le torch si la scène est sombre. Ne le rallume jamais si l'user l'a éteint.
     private func adjustTorchForLighting() {
-        guard let device = CaptureSession.current.device,
+        guard !userDisabledTorch,
+              let device = CaptureSession.current.device,
               device.isTorchAvailable,
-              let avDevice = device as? AVCaptureDevice else { return }
-
-        let isDark = avDevice.iso > lowLightISOThreshold
-        let torchIsOn = device.torchMode == .on
-
-        guard isDark != torchIsOn else { return } // pas de changement nécessaire
+              device.torchMode == .off,
+              let avDevice = device as? AVCaptureDevice,
+              avDevice.iso > lowLightISOThreshold else { return }
 
         try? device.lockForConfiguration()
-        device.torchMode = isDark ? .on : .off
+        device.torchMode = .on
         device.unlockForConfiguration()
+    }
+
+    /// Appelé quand l'user éteint le flash manuellement — bloque le flash auto pour la session.
+    func userDidDisableTorch() {
+        userDisabledTorch = true
     }
 
     /// Corrige les images à contre-jour avant la détection de contours.

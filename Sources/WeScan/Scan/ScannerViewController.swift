@@ -429,6 +429,7 @@ public final class ScannerViewController: UIViewController {
             flashEnabled = false
             flashButton.setImage(flashImage, for: .normal)
             flashButton.tintColor = .white
+            captureSessionManager?.userDidDisableTorch()
         case .unknown, .unavailable:
             flashEnabled = false
             flashButton.setImage(flashOffImage, for: .normal)
