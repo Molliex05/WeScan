@@ -44,7 +44,9 @@ enum VisionRectangleDetector {
 
             rectDetectRequest.minimumConfidence = 0.3
             rectDetectRequest.maximumObservations = 15
-            rectDetectRequest.minimumAspectRatio = 0.3
+            rectDetectRequest.minimumAspectRatio = 0.1  // reçus très longs et étroits
+            rectDetectRequest.quadratureTolerance = 40  // tolère les coins déformés par l'ombre
+            rectDetectRequest.minimumSize = 0.1         // détecte même les petits reçus
 
             return rectDetectRequest
         }()

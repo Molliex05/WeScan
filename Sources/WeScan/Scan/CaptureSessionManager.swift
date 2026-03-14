@@ -62,8 +62,20 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     /// Whether the CaptureSessionManager should be detecting quadrilaterals.
     private var isDetecting = true
 
-    /// Reusable Core Image context for live frame preprocessing (GPU-accelerated).
-    private let ciContext = CIContext(options: [.useSoftwareRenderer: false])
+    /// Filtres Core Image créés une seule fois et réutilisés à chaque frame (évite les allocations).
+    private let shadowFilter: CIFilter = {
+        let f = CIFilter.highlightShadowAdjust()
+        f.shadowAmount = 0.85
+        f.highlightAmount = 0.1
+        return f
+    }()
+    private let colorFilter: CIFilter = {
+        let f = CIFilter.colorControls()
+        f.contrast = 1.2
+        f.brightness = 0.1
+        f.saturation = 1.0
+        return f
+    }()
 
     /// The number of times no rectangles have been found in a row.
     private var noRectangleCount = 0
@@ -244,20 +256,12 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     }
 
     /// Corrige les images à contre-jour avant la détection de contours.
-    /// Léger et rapide — GPU Core Image, exécuté sur chaque frame vidéo.
+    /// Réutilise les filtres pré-créés pour éviter les allocations à chaque frame.
     private func preprocessFrameForDetection(_ image: CIImage) -> CIImage {
-        let shadow = CIFilter.highlightShadowAdjust()
-        shadow.inputImage = image
-        shadow.shadowAmount = 0.85
-        shadow.highlightAmount = 0.1
-        guard let shadowOutput = shadow.outputImage else { return image }
-
-        let color = CIFilter.colorControls()
-        color.inputImage = shadowOutput
-        color.contrast = 1.2
-        color.brightness = 0.1
-        color.saturation = 1.0
-        return color.outputImage ?? shadowOutput
+        shadowFilter.setValue(image, forKey: kCIInputImageKey)
+        guard let shadowOutput = shadowFilter.outputImage else { return image }
+        colorFilter.setValue(shadowOutput, forKey: kCIInputImageKey)
+        return colorFilter.outputImage ?? shadowOutput
     }
 
     private func processRectangle(rectangle: Quadrilateral?, imageSize: CGSize) {
