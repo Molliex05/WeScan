@@ -69,7 +69,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     private var noRectangleCount = 0
 
     /// The minimum number of time required by `noRectangleCount` to validate that no rectangles have been found.
-    private let noRectangleThreshold = 3
+    private let noRectangleThreshold = 8
 
     // MARK: Life Cycle
 
@@ -248,14 +248,14 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     private func preprocessFrameForDetection(_ image: CIImage) -> CIImage {
         let shadow = CIFilter.highlightShadowAdjust()
         shadow.inputImage = image
-        shadow.shadowAmount = 0.6
+        shadow.shadowAmount = 0.85
         shadow.highlightAmount = 0.1
         guard let shadowOutput = shadow.outputImage else { return image }
 
         let color = CIFilter.colorControls()
         color.inputImage = shadowOutput
-        color.contrast = 1.1
-        color.brightness = 0.05
+        color.contrast = 1.2
+        color.brightness = 0.1
         color.saturation = 1.0
         return color.outputImage ?? shadowOutput
     }
