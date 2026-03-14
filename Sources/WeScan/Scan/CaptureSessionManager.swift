@@ -77,6 +77,9 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
         return f
     }()
 
+    // swiftlint:disable:next line_length
+    private let wescanBuildTag = "WeScan@17ba814 conf=0.3 shadow=0.85 noRectThresh=8 minAspect=0.1"
+
     /// The number of times no rectangles have been found in a row.
     private var noRectangleCount = 0
 
@@ -94,7 +97,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
         super.init()
 
-        print("🎥 CaptureSessionManager: Initializing with preview layer: \(videoPreviewLayer)")
+        print("🎥 \(wescanBuildTag)")
         guard let device = AVCaptureDevice.default(for: AVMediaType.video) else {
             let error = ImageScannerControllerError.inputDevice
             delegate?.captureSessionManager(self, didFailWithError: error)
