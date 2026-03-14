@@ -267,9 +267,9 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     private func adjustTorchForLighting() {
         guard let device = CaptureSession.current.device,
               device.isTorchAvailable,
-              device.isExposureModeSupported(.continuousAutoExposure) else { return }
+              let avDevice = device as? AVCaptureDevice else { return }
 
-        let isDark = device.iso > lowLightISOThreshold
+        let isDark = avDevice.iso > lowLightISOThreshold
         let torchIsOn = device.torchMode == .on
 
         guard isDark != torchIsOn else { return } // pas de changement nécessaire
