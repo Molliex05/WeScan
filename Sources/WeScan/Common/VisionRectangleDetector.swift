@@ -44,7 +44,8 @@ enum VisionRectangleDetector {
 
             rectDetectRequest.minimumConfidence = 0.3
             rectDetectRequest.maximumObservations = 15
-            rectDetectRequest.minimumAspectRatio = 0.1  // reçus très longs et étroits
+            rectDetectRequest.minimumAspectRatio = 0.1  // reçus très étroits (58mm de large)
+            rectDetectRequest.maximumAspectRatio = 0.65 // exclut A4 (~0.71) et letter (~0.77)
             rectDetectRequest.quadratureTolerance = 40  // tolère les coins déformés par l'ombre
             rectDetectRequest.minimumSize = 0.1         // détecte même les petits reçus
 
@@ -75,17 +76,12 @@ enum VisionRectangleDetector {
             completion: completion)
     }
 
-    /// Detects rectangles from the given image.
-    /// Uses VNDetectDocumentSegmentationRequest (ML) on iOS 16+, falls back to VNDetectRectanglesRequest.
+    /// Detects rectangles from the given image on iOS 11 and above.
     static func rectangle(forImage image: CIImage, completion: @escaping ((Quadrilateral?) -> Void)) {
-        if #available(iOS 16.0, *) {
-            detectDocument(forImage: image, completion: completion)
-        } else {
-            let imageRequestHandler = VNImageRequestHandler(ciImage: image, options: [:])
-            VisionRectangleDetector.completeImageRequest(
-                for: imageRequestHandler, width: image.extent.width,
-                height: image.extent.height, completion: completion)
-        }
+        let imageRequestHandler = VNImageRequestHandler(ciImage: image, options: [:])
+        VisionRectangleDetector.completeImageRequest(
+            for: imageRequestHandler, width: image.extent.width,
+            height: image.extent.height, completion: completion)
     }
 
     static func rectangle(
@@ -93,51 +89,10 @@ enum VisionRectangleDetector {
         orientation: CGImagePropertyOrientation,
         completion: @escaping ((Quadrilateral?) -> Void)
     ) {
-        if #available(iOS 16.0, *) {
-            let orientedImage = image.oriented(orientation)
-            detectDocument(forImage: image, orientation: orientation, width: orientedImage.extent.width, height: orientedImage.extent.height, completion: completion)
-        } else {
-            let imageRequestHandler = VNImageRequestHandler(ciImage: image, orientation: orientation, options: [:])
-            let orientedImage = image.oriented(orientation)
-            VisionRectangleDetector.completeImageRequest(
-                for: imageRequestHandler, width: orientedImage.extent.width,
-                height: orientedImage.extent.height, completion: completion)
-        }
-    }
-
-    /// Détection ML de document via VNDetectDocumentSegmentationRequest (iOS 16+).
-    /// Beaucoup plus robuste que VNDetectRectanglesRequest pour les reçus et factures.
-    @available(iOS 16.0, *)
-    private static func detectDocument(
-        forImage image: CIImage,
-        orientation: CGImagePropertyOrientation? = nil,
-        width: CGFloat? = nil,
-        height: CGFloat? = nil,
-        completion: @escaping ((Quadrilateral?) -> Void)
-    ) {
-        let w = width ?? image.extent.width
-        let h = height ?? image.extent.height
-
-        let request = VNDetectDocumentSegmentationRequest { request, error in
-            guard error == nil,
-                  let results = request.results as? [VNDocumentObservation],
-                  let observation = results.first else {
-                completion(nil)
-                return
-            }
-
-            let quad = Quadrilateral(rectangleObservation: observation)
-            let transform = CGAffineTransform.identity.scaledBy(x: w, y: h)
-            completion(quad.applying(transform))
-        }
-
-        let handler: VNImageRequestHandler
-        if let orientation {
-            handler = VNImageRequestHandler(ciImage: image, orientation: orientation, options: [:])
-        } else {
-            handler = VNImageRequestHandler(ciImage: image, options: [:])
-        }
-
-        try? handler.perform([request])
+        let imageRequestHandler = VNImageRequestHandler(ciImage: image, orientation: orientation, options: [:])
+        let orientedImage = image.oriented(orientation)
+        VisionRectangleDetector.completeImageRequest(
+            for: imageRequestHandler, width: orientedImage.extent.width,
+            height: orientedImage.extent.height, completion: completion)
     }
 }
