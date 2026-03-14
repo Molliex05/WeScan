@@ -7,6 +7,8 @@
 //
 
 import AVFoundation
+import CoreImage
+import CoreImage.CIFilterBuiltins
 import CoreMotion
 import Foundation
 import UIKit
@@ -59,6 +61,9 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
 
     /// Whether the CaptureSessionManager should be detecting quadrilaterals.
     private var isDetecting = true
+
+    /// Reusable Core Image context for live frame preprocessing (GPU-accelerated).
+    private let ciContext = CIContext(options: [.useSoftwareRenderer: false])
 
     /// The number of times no rectangles have been found in a row.
     private var noRectangleCount = 0
@@ -224,16 +229,35 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
             print("📸 CaptureSessionManager: First frame received. imageSize=\(imageSize)")
         }
 
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
+        let processedImage = preprocessFrameForDetection(ciImage)
+
         if #available(iOS 11.0, *) {
-            VisionRectangleDetector.rectangle(forPixelBuffer: pixelBuffer) { rectangle in
+            VisionRectangleDetector.rectangle(forImage: processedImage) { rectangle in
                 self.processRectangle(rectangle: rectangle, imageSize: imageSize)
             }
         } else {
-            let finalImage = CIImage(cvPixelBuffer: pixelBuffer)
-            CIRectangleDetector.rectangle(forImage: finalImage) { rectangle in
+            CIRectangleDetector.rectangle(forImage: processedImage) { rectangle in
                 self.processRectangle(rectangle: rectangle, imageSize: imageSize)
             }
         }
+    }
+
+    /// Corrige les images à contre-jour avant la détection de contours.
+    /// Léger et rapide — GPU Core Image, exécuté sur chaque frame vidéo.
+    private func preprocessFrameForDetection(_ image: CIImage) -> CIImage {
+        let shadow = CIFilter.highlightShadowAdjust()
+        shadow.inputImage = image
+        shadow.shadowAmount = 0.6
+        shadow.highlightAmount = 0.1
+        guard let shadowOutput = shadow.outputImage else { return image }
+
+        let color = CIFilter.colorControls()
+        color.inputImage = shadowOutput
+        color.contrast = 1.1
+        color.brightness = 0.05
+        color.saturation = 1.0
+        return color.outputImage ?? shadowOutput
     }
 
     private func processRectangle(rectangle: Quadrilateral?, imageSize: CGSize) {
