@@ -62,20 +62,6 @@ enum VisionRectangleDetector {
 
     // MARK: - Document Segmentation (iOS 13+, ML-based paper detection)
 
-    /// Converts a VNDocumentObservation's bounding box to a Quadrilateral.
-    /// VNDocumentObservation only exposes `boundingBox` (not individual corner points like
-    /// VNRectangleObservation). We construct an axis-aligned quad from the bounding rect.
-    /// This is accurate enough for initial detection — the Edit screen allows fine-tuning.
-    private static func quad(from observation: VNDocumentObservation) -> Quadrilateral {
-        let bbox = observation.boundingBox
-        return Quadrilateral(
-            topLeft:     CGPoint(x: bbox.minX, y: bbox.maxY),
-            topRight:    CGPoint(x: bbox.maxX, y: bbox.maxY),
-            bottomRight: CGPoint(x: bbox.maxX, y: bbox.minY),
-            bottomLeft:  CGPoint(x: bbox.minX, y: bbox.minY)
-        )
-    }
-
     /// Uses VNDetectDocumentSegmentationRequest — an ML model specifically trained to detect
     /// paper documents in real-world scenes. Unlike VNDetectRectanglesRequest (which finds any
     /// rectangular shape), this detector only fires on actual paper/document regions.
@@ -97,7 +83,16 @@ enum VisionRectangleDetector {
                 return
             }
 
-            let quad = self.quad(from: observation)
+            // VNDocumentObservation exposes boundingBox (axis-aligned rect in normalized coords).
+            // We convert it to a full Quadrilateral — accurate enough for initial detection;
+            // the Edit screen lets the user fine-tune corners if needed.
+            let bbox = observation.boundingBox
+            let quad = Quadrilateral(
+                topLeft:     CGPoint(x: bbox.minX, y: bbox.maxY),
+                topRight:    CGPoint(x: bbox.maxX, y: bbox.maxY),
+                bottomRight: CGPoint(x: bbox.maxX, y: bbox.minY),
+                bottomLeft:  CGPoint(x: bbox.minX, y: bbox.minY)
+            )
             let transform = CGAffineTransform.identity.scaledBy(x: width, y: height)
             completion(quad.applying(transform))
         }
@@ -123,7 +118,13 @@ enum VisionRectangleDetector {
                 return
             }
 
-            let quad = self.quad(from: observation)
+            let bbox = observation.boundingBox
+            let quad = Quadrilateral(
+                topLeft:     CGPoint(x: bbox.minX, y: bbox.maxY),
+                topRight:    CGPoint(x: bbox.maxX, y: bbox.maxY),
+                bottomRight: CGPoint(x: bbox.maxX, y: bbox.minY),
+                bottomLeft:  CGPoint(x: bbox.minX, y: bbox.minY)
+            )
             let transform = CGAffineTransform.identity.scaledBy(x: width, y: height)
             completion(quad.applying(transform))
         }
