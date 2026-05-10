@@ -75,7 +75,7 @@ enum VisionRectangleDetector {
     ) {
         let request = VNDetectDocumentSegmentationRequest { request, error in
             guard error == nil,
-                  let results = request.results as? [VNDocumentObservation],
+                  let results = request.results as? [VNDetectedObjectObservation],
                   let observation = results.first else {
                 // No document found — return nil, don't fall back to rectangle detection.
                 // This is intentional: we don't want to hallucinate shapes when there's no paper.
@@ -83,9 +83,6 @@ enum VisionRectangleDetector {
                 return
             }
 
-            // VNDocumentObservation exposes boundingBox (axis-aligned rect in normalized coords).
-            // We convert it to a full Quadrilateral — accurate enough for initial detection;
-            // the Edit screen lets the user fine-tune corners if needed.
             let bbox = observation.boundingBox
             let quad = Quadrilateral(
                 topLeft:     CGPoint(x: bbox.minX, y: bbox.maxY),
@@ -101,8 +98,6 @@ enum VisionRectangleDetector {
         try? handler.perform([request])
     }
 
-    /// Same as detectDocument(forPixelBuffer:) but for CIImage (used by CaptureSessionManager's
-    /// live camera feed after preprocessing).
     @available(iOS 13.0, *)
     private static func detectDocument(
         forImage image: CIImage,
@@ -112,7 +107,7 @@ enum VisionRectangleDetector {
     ) {
         let request = VNDetectDocumentSegmentationRequest { request, error in
             guard error == nil,
-                  let results = request.results as? [VNDocumentObservation],
+                  let results = request.results as? [VNDetectedObjectObservation],
                   let observation = results.first else {
                 completion(nil)
                 return
