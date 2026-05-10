@@ -78,7 +78,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     }()
 
     // swiftlint:disable:next line_length
-    private let wescanBuildTag = "WeScan@4ccb689 maxAspect=0.65 minAspect=0.1 conf=0.3 noRectThresh=8"
+    private let wescanBuildTag = "WeScan@doc-seg-ios13 conf=0.5 minSize=0.15 maxObs=8 noRectThresh=12"
 
     /// Seuil ISO au-delà duquel on considère que la scène est trop sombre (active le torch).
     private let lowLightISOThreshold: Float = 800
@@ -89,7 +89,8 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     private var noRectangleCount = 0
 
     /// The minimum number of time required by `noRectangleCount` to validate that no rectangles have been found.
-    private let noRectangleThreshold = 8
+    /// Raised from 8 → 12: requires more consecutive empty frames before resetting, reducing flicker and false resets.
+    private let noRectangleThreshold = 12
 
     // MARK: Life Cycle
 
