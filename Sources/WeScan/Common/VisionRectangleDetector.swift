@@ -14,8 +14,6 @@ import Vision
 @available(iOS 11.0, *)
 enum VisionRectangleDetector {
 
-    // MARK: - Rectangle Detection (fallback for iOS 11-12 + imported images)
-
     private static func completeImageRequest(
         for request: VNImageRequestHandler,
         width: CGFloat,
@@ -60,119 +58,27 @@ enum VisionRectangleDetector {
         }
     }
 
-    // MARK: - Document Segmentation (iOS 15+, ML-based paper detection)
-
-    /// Uses VNDetectDocumentSegmentationRequest — an ML model specifically trained to detect
-    /// paper documents in real-world scenes. Unlike VNDetectRectanglesRequest (which finds any
-    /// rectangular shape), this detector only fires on actual paper/document regions.
-    /// This eliminates false positives from windows, doors, shelves, screens, etc.
-    @available(iOS 15.0, *)
-    private static func detectDocument(
-        forPixelBuffer pixelBuffer: CVPixelBuffer,
-        width: CGFloat,
-        height: CGFloat,
-        completion: @escaping ((Quadrilateral?) -> Void)
-    ) {
-        let request = VNDetectDocumentSegmentationRequest { request, error in
-            guard error == nil,
-                  let results = request.results as? [VNDetectedObjectObservation],
-                  let observation = results.first else {
-                // No document found — return nil, don't fall back to rectangle detection.
-                // This is intentional: we don't want to hallucinate shapes when there's no paper.
-                completion(nil)
-                return
-            }
-
-            let bbox = observation.boundingBox
-            let quad = Quadrilateral(
-                topLeft:     CGPoint(x: bbox.minX, y: bbox.maxY),
-                topRight:    CGPoint(x: bbox.maxX, y: bbox.maxY),
-                bottomRight: CGPoint(x: bbox.maxX, y: bbox.minY),
-                bottomLeft:  CGPoint(x: bbox.minX, y: bbox.minY)
-            )
-            let transform = CGAffineTransform.identity.scaledBy(x: width, y: height)
-            completion(quad.applying(transform))
-        }
-
-        let handler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
-        try? handler.perform([request])
-    }
-
-    @available(iOS 15.0, *)
-    private static func detectDocument(
-        forImage image: CIImage,
-        width: CGFloat,
-        height: CGFloat,
-        completion: @escaping ((Quadrilateral?) -> Void)
-    ) {
-        let request = VNDetectDocumentSegmentationRequest { request, error in
-            guard error == nil,
-                  let results = request.results as? [VNDetectedObjectObservation],
-                  let observation = results.first else {
-                completion(nil)
-                return
-            }
-
-            let bbox = observation.boundingBox
-            let quad = Quadrilateral(
-                topLeft:     CGPoint(x: bbox.minX, y: bbox.maxY),
-                topRight:    CGPoint(x: bbox.maxX, y: bbox.maxY),
-                bottomRight: CGPoint(x: bbox.maxX, y: bbox.minY),
-                bottomLeft:  CGPoint(x: bbox.minX, y: bbox.minY)
-            )
-            let transform = CGAffineTransform.identity.scaledBy(x: width, y: height)
-            completion(quad.applying(transform))
-        }
-
-        let handler = VNImageRequestHandler(ciImage: image, options: [:])
-        try? handler.perform([request])
-    }
-
-    // MARK: - Public API
-
     /// Detects rectangles from the given CVPixelBuffer (live camera feed).
-    /// On iOS 15+, uses ML-based document segmentation to only detect actual paper.
-    /// Falls back to rectangle detection on iOS 11-14 with stricter thresholds.
     static func rectangle(forPixelBuffer pixelBuffer: CVPixelBuffer, completion: @escaping ((Quadrilateral?) -> Void)) {
-        let width = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
-        let height = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
-
-        if #available(iOS 15.0, *) {
-            // Primary: ML document segmentation (paper only, no hallucinations)
-            detectDocument(forPixelBuffer: pixelBuffer, width: width, height: height, completion: completion)
-        } else {
-            // iOS 11-14 fallback: rectangle detection with stricter thresholds
-            let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
-            VisionRectangleDetector.completeImageRequest(
-                for: imageRequestHandler,
-                width: width,
-                height: height,
-                completion: completion)
-        }
+        let imageRequestHandler = VNImageRequestHandler(cvPixelBuffer: pixelBuffer, options: [:])
+        VisionRectangleDetector.completeImageRequest(
+            for: imageRequestHandler,
+            width: CGFloat(CVPixelBufferGetWidth(pixelBuffer)),
+            height: CGFloat(CVPixelBufferGetHeight(pixelBuffer)),
+            completion: completion)
     }
 
-    /// Detects rectangles from a single image (live camera feed after preprocessing, or imports).
-    /// On iOS 15+, uses ML-based document segmentation for the live feed to avoid hallucinations.
-    /// Falls back to rectangle detection on iOS 11-14 with stricter thresholds.
+    /// Detects rectangles from a single image.
     static func rectangle(forImage image: CIImage, completion: @escaping ((Quadrilateral?) -> Void)) {
-        if #available(iOS 15.0, *) {
-            // Primary: ML document segmentation (paper only, no hallucinations)
-            detectDocument(forImage: image, width: image.extent.width, height: image.extent.height, completion: completion)
-        } else {
-            // iOS 11-14 fallback: rectangle detection with stricter thresholds
-            let imageRequestHandler = VNImageRequestHandler(ciImage: image, options: [:])
-            VisionRectangleDetector.completeImageRequest(
-                for: imageRequestHandler,
-                width: image.extent.width,
-                height: image.extent.height,
-                completion: completion)
-        }
+        let imageRequestHandler = VNImageRequestHandler(ciImage: image, options: [:])
+        VisionRectangleDetector.completeImageRequest(
+            for: imageRequestHandler,
+            width: image.extent.width,
+            height: image.extent.height,
+            completion: completion)
     }
 
-    /// Detects rectangles from a single imported image with orientation.
-    /// Used by ImageScannerController for images passed at init or via useImage().
-    /// Uses rectangle detection with strict thresholds — appropriate for one-shot imports
-    /// where the user has explicitly chosen an image they expect to contain a document.
+    /// Detects rectangles from a single image with orientation.
     static func rectangle(
         forImage image: CIImage,
         orientation: CGImagePropertyOrientation,
@@ -181,7 +87,9 @@ enum VisionRectangleDetector {
         let imageRequestHandler = VNImageRequestHandler(ciImage: image, orientation: orientation, options: [:])
         let orientedImage = image.oriented(orientation)
         VisionRectangleDetector.completeImageRequest(
-            for: imageRequestHandler, width: orientedImage.extent.width,
-            height: orientedImage.extent.height, completion: completion)
+            for: imageRequestHandler,
+            width: orientedImage.extent.width,
+            height: orientedImage.extent.height,
+            completion: completion)
     }
 }

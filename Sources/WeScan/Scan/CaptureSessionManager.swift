@@ -78,7 +78,7 @@ final class CaptureSessionManager: NSObject, AVCaptureVideoDataOutputSampleBuffe
     }()
 
     // swiftlint:disable:next line_length
-    private let wescanBuildTag = "WeScan@doc-seg-ios15 conf=0.5 minSize=0.15 maxObs=8 noRectThresh=12"
+    private let wescanBuildTag = "WeScan@v2 conf=0.5 minSize=0.15 maxObs=8 noRectThresh=12"
 
     /// Seuil ISO au-delà duquel on considère que la scène est trop sombre (active le torch).
     private let lowLightISOThreshold: Float = 800
