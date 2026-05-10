@@ -554,6 +554,9 @@ public final class ScannerViewController: UIViewController {
     @objc private func openFiles() {
         print("📁 ScannerViewController: Opening file picker")
         
+        // Stop camera session to prevent background scanning while picker is open
+        captureSessionManager?.stop()
+        
         // Light haptic feedback
         let impactGenerator = UIImpactFeedbackGenerator(style: .light)
         impactGenerator.impactOccurred()
@@ -575,6 +578,9 @@ public final class ScannerViewController: UIViewController {
     
     @objc private func openPhotos() {
         print("📸 ScannerViewController: Opening photo picker")
+        
+        // Stop camera session to prevent background scanning while picker is open
+        captureSessionManager?.stop()
         
         // Light haptic feedback
         let impactGenerator = UIImpactFeedbackGenerator(style: .light)
@@ -781,6 +787,8 @@ extension ScannerViewController: UIDocumentPickerDelegate {
                         self.processImportedImage(image, preferFullFrameQuad: preferFullFrame)
                     } else {
                         print("❌ ScannerViewController: Could not import file: \(url.lastPathComponent)")
+                        // Restart camera session since import failed and we're staying on scanner
+                        self.captureSessionManager?.start()
                     }
                 }
             }
@@ -789,6 +797,9 @@ extension ScannerViewController: UIDocumentPickerDelegate {
     
     public func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
         print("📄 ScannerViewController: Document picker was cancelled")
+        // UIDocumentPickerViewController auto-dismisses — restart session immediately.
+        // start() is async (dispatched to global queue), won't block the dismiss animation.
+        captureSessionManager?.start()
     }
 }
 
@@ -804,12 +815,17 @@ extension ScannerViewController: UIImagePickerControllerDelegate, UINavigationCo
                 self.processImportedImage(image)
             } else {
                 print("❌ ScannerViewController: Could not get image from picker")
+                // Restart camera session since import failed and we're staying on scanner
+                self.captureSessionManager?.start()
             }
         }
     }
     
     public func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         print("📸 ScannerViewController: Image picker was cancelled")
-        picker.dismiss(animated: true)
+        picker.dismiss(animated: true) { [weak self] in
+            // Restart camera session since we stopped it before presenting the picker
+            self?.captureSessionManager?.start()
+        }
     }
 }
